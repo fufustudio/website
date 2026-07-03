@@ -1,0 +1,16 @@
+declare const styles: {
+  readonly actions: string;
+  readonly hero: string;
+  readonly heroBody: string;
+  readonly heroContent: string;
+  readonly heroGrid: string;
+  readonly heroHeading: string;
+  readonly main: string;
+  readonly principleBody: string;
+  readonly principleItem: string;
+  readonly principleTitle: string;
+  readonly sectionGrid: string;
+  readonly sectionIntro: string;
+  readonly shell: string;
+};
+export = styles;
