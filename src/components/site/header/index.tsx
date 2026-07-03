@@ -58,6 +58,7 @@ export function Header({
   }, [menuOpen, menuVisible]);
 
   const normalizedPathname = normalizePathname(pathname);
+  const hasNavItems = navItems.length > 0;
   const openMobileMenu = () => {
     setMenuVisible(true);
     window.requestAnimationFrame(() => setMenuOpen(true));
@@ -68,43 +69,47 @@ export function Header({
     <header className={classNames(styles.root, styles.solidOverlay)}>
       <Container size="xl" className={styles.inner}>
         <Link href="/" className={styles.wordmark}>
-          {siteSettings?.name ?? "Fufu Starter"}
+          {siteSettings?.name ?? "Fufu"}
         </Link>
 
-        <nav aria-label="Primary navigation" className={styles.desktopNav}>
-          {navItems.map((item) => {
-            const href = hrefPathname(item.href);
-            const active = isActivePath(normalizedPathname, href);
+        {hasNavItems ? (
+          <nav aria-label="Primary navigation" className={styles.desktopNav}>
+            {navItems.map((item) => {
+              const href = hrefPathname(item.href);
+              const active = isActivePath(normalizedPathname, href);
 
-            return (
-              <Link
-                key={item.label}
-                href={item.href as LinkProps<string>["href"]}
-                aria-current={active ? "page" : undefined}
-                className={classNames(
-                  styles.desktopLink,
-                  active && styles.activeLink,
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href as LinkProps<string>["href"]}
+                  aria-current={active ? "page" : undefined}
+                  className={classNames(
+                    styles.desktopLink,
+                    active && styles.activeLink,
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        ) : null}
 
-        <button
-          type="button"
-          aria-label={menuVisible ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-          aria-controls="mobile-navigation"
-          className={styles.menuButton}
-          onClick={menuVisible ? closeMobileMenu : openMobileMenu}
-        >
-          {menuVisible ? "Close" : "Menu"}
-        </button>
+        {hasNavItems ? (
+          <button
+            type="button"
+            aria-label={menuVisible ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
+            className={styles.menuButton}
+            onClick={menuVisible ? closeMobileMenu : openMobileMenu}
+          >
+            {menuVisible ? "Close" : "Menu"}
+          </button>
+        ) : null}
       </Container>
 
-      {menuVisible ? (
+      {hasNavItems && menuVisible ? (
         <div
           id="mobile-navigation"
           className={classNames(

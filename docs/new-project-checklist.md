@@ -9,7 +9,7 @@ Use this when creating a project from `fufustudio/fufu-starter`.
 - Copy `.env.example` to `.env.local`.
 - Set `NEXT_PUBLIC_SITE_URL` for local or preview work.
 - Run `npm install`.
-- Run `npm run dev` and check the starter routes: `/`, `/example`, and `/contact`.
+- Run `npm run dev` and check the starter route: `/`.
 
 ## Product Shape
 
@@ -46,7 +46,8 @@ Use this when creating a project from `fufustudio/fufu-starter`.
 
 - Choose the form provider or replace the starter handler.
 - For Resend contact delivery, add `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and
-  `RESEND_TO_EMAIL` as server-only environment variables.
+  `RESEND_TO_EMAIL` as server-only environment variables. This launch sends to
+  `hello@fufu.studio`.
 - Verify the sending domain in Resend before production delivery.
 - Confirm `inquiry_submitted` tracks only after a real successful submission.
 - Add or rename analytics events near the component that fires them.

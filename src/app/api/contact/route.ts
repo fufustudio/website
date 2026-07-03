@@ -1,31 +1,30 @@
 import { Resend } from "resend";
+import { ContactNotificationEmail } from "@/components/email/contact-notification";
 import { optionalEnvValue } from "@/lib/env";
 
 type InquiryPayload = {
-  name?: unknown;
   email?: unknown;
-  interest?: unknown;
   message?: unknown;
+  source?: unknown;
   company?: unknown;
   botcheck?: unknown;
 };
 
 type Inquiry = {
-  name: string;
   email: string;
-  interest: string;
   message: string;
+  source: string;
 };
 
 const fieldLimits = {
-  name: 120,
   email: 254,
-  interest: 160,
-  message: 3000,
+  message: 500,
+  source: 80,
 };
 
-const validationError = "Please share your name, email, and a short message.";
+const destinationEmail = "hello@fufu.studio";
 const emailError = "Please enter a valid email address.";
+const validationError = "Please enter a short message.";
 const lengthError = "Please shorten your message and try again.";
 const configError =
   "The form provider is not configured yet. Add the required Resend environment variables.";
@@ -54,37 +53,43 @@ export async function POST(request: Request) {
 
   const apiKey = optionalEnvValue(process.env.RESEND_API_KEY);
   const fromEmail = optionalEnvValue(process.env.RESEND_FROM_EMAIL);
-  const toEmail = optionalEnvValue(process.env.RESEND_TO_EMAIL);
+  const toEmail =
+    optionalEnvValue(process.env.RESEND_TO_EMAIL) ?? destinationEmail;
 
-  if (!apiKey || !fromEmail || !toEmail) {
+  if (!apiKey || !fromEmail) {
     return contactResponse(false, configError, 500);
   }
 
   try {
     const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: fromEmail,
-      to: toEmail,
-      subject: `New website inquiry - ${inquiry.name}`,
+      to: [toEmail],
       replyTo: inquiry.email,
+      subject: "New website contact",
       text: inquiryText(inquiry),
-      html: inquiryHtml(inquiry),
+      react: ContactNotificationEmail(inquiry),
     });
 
     if (error) {
       throw new Error(error.message);
     }
 
-    return contactResponse(true);
+    return contactResponse(true, undefined, 200, data?.id);
   } catch (error) {
     console.error("[contact] Resend provider error:", error);
     return contactResponse(false, providerError, 502);
   }
 }
 
-function contactResponse(success: boolean, message?: string, status = 200) {
+function contactResponse(
+  success: boolean,
+  message?: string,
+  status = 200,
+  id?: string,
+) {
   return Response.json(
-    { success, ...(message ? { message } : {}) },
+    { success, ...(message ? { message } : {}), ...(id ? { id } : {}) },
     { status },
   );
 }
@@ -100,10 +105,9 @@ function isHoneypotSubmission(payload: InquiryPayload) {
 
 function normalizeInquiry(payload: InquiryPayload): Inquiry {
   return {
-    name: normalizeField(payload.name),
-    email: normalizeField(payload.email),
-    interest: normalizeField(payload.interest),
+    email: normalizeField(payload.email).toLowerCase(),
     message: normalizeField(payload.message),
+    source: normalizeField(payload.source) || "home",
   };
 }
 
@@ -113,54 +117,32 @@ function normalizeField(value: unknown) {
 
 function validateInquiry(inquiry: Inquiry) {
   if (
-    inquiry.name.length > fieldLimits.name ||
     inquiry.email.length > fieldLimits.email ||
-    inquiry.interest.length > fieldLimits.interest ||
-    inquiry.message.length > fieldLimits.message
+    inquiry.message.length > fieldLimits.message ||
+    inquiry.source.length > fieldLimits.source
   ) {
     return lengthError;
   }
 
-  if (!inquiry.name || !inquiry.email || !inquiry.message) {
-    return validationError;
+  if (!isValidEmail(inquiry.email)) {
+    return emailError;
   }
 
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(inquiry.email)) {
-    return emailError;
+  if (!inquiry.message) {
+    return validationError;
   }
 
   return null;
 }
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
 function inquiryText(inquiry: Inquiry) {
   return [
-    `Name: ${inquiry.name}`,
     `Email: ${inquiry.email}`,
-    `Interest: ${inquiry.interest || "-"}`,
-    "",
-    "Message:",
-    inquiry.message,
+    `Message: ${inquiry.message}`,
+    `Source: ${inquiry.source}`,
   ].join("\n");
-}
-
-function inquiryHtml(inquiry: Inquiry) {
-  return [
-    "<h1>New website inquiry</h1>",
-    "<dl>",
-    `<dt>Name</dt><dd>${escapeHtml(inquiry.name)}</dd>`,
-    `<dt>Email</dt><dd>${escapeHtml(inquiry.email)}</dd>`,
-    `<dt>Interest</dt><dd>${escapeHtml(inquiry.interest || "-")}</dd>`,
-    "</dl>",
-    "<h2>Message</h2>",
-    `<p>${escapeHtml(inquiry.message).replace(/\n/g, "<br />")}</p>`,
-  ].join("");
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }

@@ -48,6 +48,7 @@ const publicContentSecurityPolicy = contentSecurityPolicy({
     "'unsafe-inline'",
     ...(isProduction ? [] : ["'unsafe-eval'"]),
     "https://va.vercel-scripts.com",
+    "https://www.googletagmanager.com",
   ],
   "style-src": ["'self'", "'unsafe-inline'"],
   "img-src": [
@@ -68,6 +69,8 @@ const publicContentSecurityPolicy = contentSecurityPolicy({
     "https://*.apicdn.sanity.io",
     "https://va.vercel-scripts.com",
     "https://*.vercel-insights.com",
+    "https://www.google-analytics.com",
+    "https://region1.google-analytics.com",
   ],
   "frame-src": ["'self'", "https://maps.google.com", "https://www.google.com"],
   "form-action": ["'self'"],

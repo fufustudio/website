@@ -55,8 +55,8 @@ Before launch:
 Add a public privacy policy before launching a real client site with the contact
 form or analytics enabled. The policy should explain, in plain language:
 
-- What the site collects, such as name, email, message content, basic analytics,
-  and hosting logs.
+- What the site collects, such as message text, basic analytics, and hosting
+  logs.
 - Why the data is collected, such as responding to inquiries, maintaining the
   site, measuring aggregate usage, or preventing abuse.
 - Which service providers process the data, such as the hosting platform, form

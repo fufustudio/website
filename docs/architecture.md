@@ -18,6 +18,8 @@ client builds and local fallbacks for credential-free development.
   section wrappers, form fields, links, image frames, and copy helpers.
 - `src/components/sections/` - reusable page-section recipes for basic
   brochure, service, and content sites.
+- `src/components/scripts/` - reusable analytics, structured-data, and
+  third-party script mounts used by layouts.
 - `src/components/site/` - shared site chrome such as header, footer, and
   chrome-specific helpers.
 - `src/content/` - tiny local defaults and examples.
@@ -30,6 +32,8 @@ client builds and local fallbacks for credential-free development.
 - Pages own composition.
 - UI primitives own reusable controls and layout atoms.
 - Section recipes own repeated page-section composition.
+- Script components own analytics, structured data, and third-party setup; mount
+  them from the narrowest layout that needs them.
 - Site components own shared chrome.
 - `src/lib` owns cross-route logic.
 - `src/content` owns local examples and defaults.

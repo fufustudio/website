@@ -292,10 +292,20 @@ export type SiteSettingsQueryResult = {
   sameAs: Array<string> | null;
 } | null;
 
+// Source: src/lib/cms.ts
+// Variable: homePageQuery
+// Query: *[_type == "page" && slug.current == "home"][0]{    title,    description,    body  }
+export type HomePageQueryResult = {
+  title: string;
+  description: string | null;
+  body: SimplePortableText | null;
+} | null;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     '\n  *[_type == "siteSettings" && _id == "siteSettings"][0]{\n    name,\n    contactName,\n    email,\n    phone,\n    address,\n    hours,\n    primaryActionLabel,\n    primaryActionUrl,\n    url,\n    tagline,\n    areaServed,\n    sameAs\n  }\n': SiteSettingsQueryResult;
+    '\n  *[_type == "page" && slug.current == "home"][0]{\n    title,\n    description,\n    body\n  }\n': HomePageQueryResult;
   }
 }

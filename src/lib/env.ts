@@ -11,4 +11,6 @@ export const publicEnv = {
   sanityDataset: envValue("NEXT_PUBLIC_SANITY_DATASET") ?? "production",
   sanityApiVersion: envValue("NEXT_PUBLIC_SANITY_API_VERSION") ?? "2026-06-24",
   siteUrl: envValue("NEXT_PUBLIC_SITE_URL") ?? "http://localhost:3000",
+  googleAnalyticsId:
+    envValue("NEXT_PUBLIC_GOOGLE_ANALYTICS_ID") ?? "G-Q8ZQF7VMNL",
 };

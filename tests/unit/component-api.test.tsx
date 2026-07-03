@@ -68,7 +68,7 @@ describe("component API polish", () => {
         items={[
           {
             title: "Typed object route",
-            href: { pathname: "/example" },
+            href: { pathname: "/" },
           },
           {
             title: "External tracked route",
@@ -82,7 +82,7 @@ describe("component API polish", () => {
       />,
     );
 
-    expect(html).toContain('href="/example"');
+    expect(html).toContain('href="/"');
     expect(html).toContain("Learn more");
     expect(html).toContain('href="https://example.com"');
     expect(html).toContain('target="_blank"');

@@ -40,6 +40,7 @@ export type FeatureContent = {
 
 export type PageContent = {
   title: string;
+  description?: string;
   intro?: string;
   features?: FeatureContent[];
   body?: RichText;
@@ -70,6 +71,20 @@ const siteSettingsQuery = defineQuery(/* groq */ `
   }
 `);
 
+const homePageQuery = defineQuery(/* groq */ `
+  *[_type == "page" && slug.current == "home"][0]{
+    title,
+    description,
+    body
+  }
+`);
+
+const homePageFallback = {
+  title: "Hello world",
+  description: "Powered by Sanity.",
+  body: [],
+} satisfies PageContent;
+
 async function fetchCms<T>(query: string, params: QueryParams = {}) {
   if (!isSanityConfigured) return null;
 
@@ -87,4 +102,9 @@ async function fetchCms<T>(query: string, params: QueryParams = {}) {
 export async function getSiteSettings(): Promise<SiteSettings> {
   const settings = await fetchCms<SiteSettings>(siteSettingsQuery);
   return settings ?? site;
+}
+
+export async function getHomePage(): Promise<PageContent> {
+  const page = await fetchCms<PageContent>(homePageQuery);
+  return page ?? homePageFallback;
 }

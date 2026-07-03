@@ -37,30 +37,13 @@
   line-height: 1.6;
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem 1.5rem;
-  margin-top: 2rem;
-}
-
-.sectionIntro {
-  grid-column: 1 / -1;
-  justify-self: center;
-}
-
-.principleItem {
-  composes: interactive-cell from global;
-  padding: 2rem 1rem;
-}
-
-.principleTitle {
-  margin-bottom: 0.75rem;
-}
-
-.principleBody {
+.body {
   max-width: 28rem;
+  margin-top: 1.5rem;
+}
+
+.formWrap {
+  margin-top: 2rem;
 }
 
 @media (min-width: 768px) {

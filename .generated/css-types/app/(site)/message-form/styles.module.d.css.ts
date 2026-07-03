@@ -4,10 +4,8 @@ declare const styles: {
   readonly fields: string;
   readonly form: string;
   readonly honeypot: string;
-  readonly note: string;
-  readonly pending: string;
+  readonly row: string;
   readonly submit: string;
   readonly success: string;
-  readonly textarea: string;
 };
 export = styles;

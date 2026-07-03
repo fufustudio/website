@@ -13,7 +13,7 @@ Canonical instructions for Codex, Claude Code, and other coding agents working i
 
 `fufu-starter` is a lightweight Fufu house-style starter. It should enforce consistent structure, verification, styling, and data-boundary patterns while staying light on product/domain assumptions.
 
-The default app is intentionally small: `/`, `/example`, `/contact`, and optional `/studio`. Do not turn the starter into a fake business website. Add examples only when they teach a reusable implementation pattern.
+The default app is intentionally small: `/` and optional `/studio`. Do not turn the starter into a fake business website. Add examples only when they teach a reusable implementation pattern.
 
 ## Design-To-Site Workflow
 
@@ -68,6 +68,7 @@ Use Node.js 22 and npm 10, matching `package.json`, `.node-version`, and CI.
 - Pages compose content, data helpers, and reusable components. They should stay thin.
 - Reusable components live under `src/components/**/index.tsx` with colocated `styles.module.css` when needed.
 - `src/components/ui` owns low-level primitives. `src/components/sections` owns reusable page-section recipes. `src/components/site` owns shared site chrome.
+- `src/components/scripts` owns reusable analytics, structured-data, and third-party script mounts used by layouts.
 - `globals.css` owns theme tokens, typography, grid helpers, shared hover states, and cross-page utilities.
 - Component-only selectors belong in CSS Modules.
 - Do not add hard-coded brand hex values in components. Promote reusable values to theme tokens.
@@ -90,7 +91,7 @@ Use `defineType`, `defineField`, and `defineArrayMember`. Let Sanity generate ID
 
 ## Forms And Analytics
 
-The contact form is a client component in `src/app/(site)/contact/contact-form/index.tsx`. It validates required fields, includes honeypots, submits through the server-side Resend route when configured, and tracks successful human submissions with `inquiry_submitted`.
+The contact form is a client component in `src/app/(site)/message-form/index.tsx`. It validates a single message field, includes honeypots, submits through the server-side Resend route when configured, and tracks successful human submissions with `inquiry_submitted`.
 
 Vercel Analytics events should stay close to the interaction surface that fires them.
 

@@ -2,6 +2,19 @@
 
 Fufu house starter for fast, consistent Next.js site builds.
 
+## Barebones Launch
+
+This repo is currently configured for a home-only launch:
+
+- `/` renders the Sanity `page` document with slug `home`, falling back to
+  `Hello world` / `Powered by Sanity.`
+- `/studio` uses Sanity project `8l26et78` and dataset `production`.
+- The homepage message form posts to `/api/contact` and sends through Resend to
+  `hello@fufu.studio`.
+
+Use a rotated Resend key in `RESEND_API_KEY`; do not reuse any key shared in
+chat or commit secrets to the repo.
+
 ## Agent Entry
 
 Read [AGENTS.md](./AGENTS.md), then use:

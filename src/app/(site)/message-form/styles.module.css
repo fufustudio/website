@@ -1,0 +1,56 @@
+.form {
+  width: min(100%, 520px);
+}
+
+.honeypot {
+  position: absolute;
+  left: -100vw;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.row {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.fields {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.field {
+  width: 100%;
+}
+
+.submit {
+  width: 100%;
+  min-height: 3.25rem;
+}
+
+.success,
+.error {
+  margin-top: 0.875rem;
+  font-size: 0.9rem;
+}
+
+.success {
+  color: var(--color-fg);
+}
+
+.error {
+  color: var(--color-accent);
+}
+
+@media (min-width: 640px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .submit {
+    width: auto;
+    min-width: 7rem;
+  }
+}

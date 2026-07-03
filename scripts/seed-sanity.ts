@@ -39,19 +39,23 @@ async function createBySlug(document: SeedDocument) {
   const slug = document.slug?.current;
   if (!slug) throw new Error(`Missing slug for ${document._type}`);
 
+  if (dryRun) {
+    log("[seed] Would create or patch document", {
+      type: document._type,
+      slug,
+    });
+    return `dry-run-${document._type}-${slug}`;
+  }
+
   const existing = await client.fetch<{ _id: string } | null>(
     `*[_type == $type && slug.current == $slug][0]{_id}`,
     { type: document._type, slug },
   );
 
   if (existing?._id) {
-    log("[seed] Existing document", { type: document._type, slug });
+    await client.patch(existing._id).set(document).commit();
+    log("[seed] Patched existing document", { type: document._type, slug });
     return existing._id;
-  }
-
-  if (dryRun) {
-    log("[seed] Would create document", { type: document._type, slug });
-    return `dry-run-${document._type}-${slug}`;
   }
 
   const created = await client.create(document);
@@ -68,29 +72,10 @@ async function main() {
 
   const page = {
     _type: "page",
-    title: "Example Page",
-    slug: { _type: "slug" as const, current: "example-page" },
-    description: "Minimal seeded page for testing CMS setup.",
-    body: [block("Replace this with project content.", "example-page-body")],
-  };
-
-  const service = {
-    _type: "service",
-    title: "Example Service",
-    slug: { _type: "slug" as const, current: "example-service" },
-    summary: "Minimal service entry for testing CMS setup.",
-    icon: "circle",
-    order: 0,
-    active: true,
-  };
-
-  const post = {
-    _type: "post",
-    title: "Example Post",
-    slug: { _type: "slug" as const, current: "example-post" },
-    publishedAt: new Date().toISOString(),
-    excerpt: "Minimal post entry for testing CMS setup.",
-    body: [block("Replace this with project content.", "example-post-body")],
+    title: "Hello world",
+    slug: { _type: "slug" as const, current: "home" },
+    description: "Powered by Sanity.",
+    body: [block("This is the first live content baseline.", "home-body")],
   };
 
   if (dryRun) {
@@ -101,8 +86,6 @@ async function main() {
   }
 
   await createBySlug(page);
-  await createBySlug(service);
-  await createBySlug(post);
 
   log("[seed] Done.");
 }

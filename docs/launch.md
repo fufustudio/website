@@ -11,17 +11,17 @@
 Required for production metadata:
 
 - `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_SANITY_PROJECT_ID=8l26et78`
+- `NEXT_PUBLIC_SANITY_DATASET=production`
+- `NEXT_PUBLIC_SANITY_API_VERSION=2026-06-24`
+- `RESEND_API_KEY` with a rotated key stored only in Vercel/local env
+- `RESEND_FROM_EMAIL=Fufu <hello@fufu.studio>` after `fufu.studio` is verified
+- `RESEND_TO_EMAIL=hello@fufu.studio`
 
 Optional:
 
-- `NEXT_PUBLIC_SANITY_PROJECT_ID`
-- `NEXT_PUBLIC_SANITY_DATASET`
-- `NEXT_PUBLIC_SANITY_API_VERSION`
 - `SANITY_API_READ_TOKEN`
 - `SANITY_REVALIDATE_SECRET`
-- `RESEND_API_KEY`
-- `RESEND_FROM_EMAIL`
-- `RESEND_TO_EMAIL`
 - `GOOGLE_SITE_VERIFICATION`
 
 ## Pre-Launch Checks

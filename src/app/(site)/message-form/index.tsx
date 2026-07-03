@@ -7,25 +7,18 @@ import { buttonClasses } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
 import styles from "./styles.module.css";
 
-type InquiryState = {
+type CaptureState = {
   status: "idle" | "success" | "error";
   message?: string;
 };
 
-const noteId = "contact-form-note";
 const fieldLimits = {
-  name: 120,
   email: 254,
-  interest: 160,
-  message: 3000,
+  message: 500,
 };
 
-function classNames(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-export function ContactForm({ note }: { note?: string }) {
-  const [state, setState] = useState<InquiryState>({ status: "idle" });
+export function MessageForm() {
+  const [state, setState] = useState<CaptureState>({ status: "idle" });
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
@@ -45,15 +38,13 @@ export function ContactForm({ note }: { note?: string }) {
       return;
     }
 
-    const name = String(formData.get("name") ?? "").trim();
-    const email = String(formData.get("email") ?? "").trim();
-    const interest = String(formData.get("interest") ?? "").trim();
+    const email = String(formData.get("email") ?? "")
+      .trim()
+      .toLowerCase();
     const message = String(formData.get("message") ?? "").trim();
 
     if (
-      name.length > fieldLimits.name ||
       email.length > fieldLimits.email ||
-      interest.length > fieldLimits.interest ||
       message.length > fieldLimits.message
     ) {
       setState({
@@ -63,15 +54,7 @@ export function ContactForm({ note }: { note?: string }) {
       return;
     }
 
-    if (!name || !email || !message) {
-      setState({
-        status: "error",
-        message: "Please share your name, email, and a short message.",
-      });
-      return;
-    }
-
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    if (!isValidEmail(email)) {
       setState({
         status: "error",
         message: "Please enter a valid email address.",
@@ -79,23 +62,24 @@ export function ContactForm({ note }: { note?: string }) {
       return;
     }
 
+    if (!message) {
+      setState({
+        status: "error",
+        message: "Please enter a short message.",
+      });
+      return;
+    }
+
     setPending(true);
 
     try {
-      const payload = {
-        name,
-        email,
-        interest,
-        message,
-      };
-
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ email, message, source: "home" }),
       });
       const result = await res.json().catch(() => null);
 
@@ -112,7 +96,7 @@ export function ContactForm({ note }: { note?: string }) {
         message:
           error instanceof Error
             ? error.message
-            : "Something went wrong sending your message. Please try again after the provider is configured.",
+            : "Something went wrong sending your message. Please try again later.",
       });
     } finally {
       setPending(false);
@@ -134,53 +118,40 @@ export function ContactForm({ note }: { note?: string }) {
         />
       </div>
 
-      <div className={classNames(styles.fields, pending && styles.pending)}>
-        <FormField
-          id="contact-name"
-          name="name"
-          required
-          label="Name"
-          placeholder="Name*"
-          maxLength={fieldLimits.name}
-          className={styles.field}
-        />
-        <FormField
-          id="contact-email"
-          type="email"
-          name="email"
-          required
-          label="Email address"
-          placeholder="Email address*"
-          maxLength={fieldLimits.email}
-          className={styles.field}
-        />
-        <FormField
-          id="contact-interest"
-          name="interest"
-          label="Interest"
-          placeholder="What are you interested in?"
-          maxLength={fieldLimits.interest}
-          className={styles.field}
-        />
-        <FormField
-          id="contact-message"
-          name="message"
-          rows={6}
-          required
-          label="Message"
-          aria-describedby={note ? noteId : undefined}
-          placeholder="Short message*"
-          maxLength={fieldLimits.message}
-          className={classNames(styles.field, styles.textarea)}
-          multiline
-        />
+      <div className={styles.row}>
+        <div className={styles.fields}>
+          <FormField
+            id="contact-email"
+            name="email"
+            type="email"
+            required
+            label="Email"
+            placeholder="Email"
+            autoComplete="email"
+            inputMode="email"
+            maxLength={fieldLimits.email}
+            className={styles.field}
+            disabled={pending}
+          />
+          <FormField
+            id="contact-message"
+            name="message"
+            required
+            label="Message"
+            placeholder="Message"
+            maxLength={fieldLimits.message}
+            className={styles.field}
+            disabled={pending}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={pending}
+          className={buttonClasses("primary", styles.submit)}
+        >
+          {pending ? "Sending..." : "Send"}
+        </button>
       </div>
-
-      {note ? (
-        <p id={noteId} className={styles.note}>
-          {note}
-        </p>
-      ) : null}
 
       {state.status === "success" ? (
         <p className={styles.success} role="status">
@@ -191,14 +162,10 @@ export function ContactForm({ note }: { note?: string }) {
       {state.status === "error" ? (
         <p className={styles.error}>{state.message}</p>
       ) : null}
-
-      <button
-        type="submit"
-        disabled={pending}
-        className={buttonClasses("primary", styles.submit)}
-      >
-        {pending ? "Sending..." : "Submit"}
-      </button>
     </form>
   );
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }

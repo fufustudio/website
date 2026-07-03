@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site-defaults";
 
-const staticRoutes = ["", "/example", "/contact"] as const;
+const staticRoutes = [""] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

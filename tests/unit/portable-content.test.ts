@@ -11,7 +11,7 @@ describe("portableTextHref", () => {
     expect(portableTextHref("mailto:hello@example.com")).toBe(
       "mailto:hello@example.com",
     );
-    expect(portableTextHref("/contact")).toBe("/contact");
+    expect(portableTextHref("/")).toBe("/");
   });
 
   it("rejects scriptable or unsupported protocols", () => {
@@ -24,7 +24,7 @@ describe("portableTextHref", () => {
 
   it("identifies http links as external", () => {
     expect(isExternalPortableTextHref("https://example.com")).toBe(true);
-    expect(isExternalPortableTextHref("/contact")).toBe(false);
+    expect(isExternalPortableTextHref("/")).toBe(false);
     expect(isExternalPortableTextHref("mailto:hello@example.com")).toBe(false);
   });
 });
