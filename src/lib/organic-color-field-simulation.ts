@@ -72,6 +72,7 @@ export type OrganicSimulation = {
   width: number;
   height: number;
   tone: OrganicTone;
+  variant: OrganicFieldVariant;
   reducedMotion: boolean;
   time: number;
   noise: ReturnType<typeof createNoise3D>;
@@ -97,16 +98,16 @@ const nodeCount = 18;
 const toneColors: Record<OrganicTone, BlobColorConfig[]> = {
   light: [
     {
-      color: "rgba(222, 173, 137, 0.62)",
-      opacity: 0.72,
+      color: "rgba(222, 173, 137, 0.5)",
+      opacity: 0.58,
     },
     {
-      color: "rgba(250, 217, 157, 0.66)",
-      opacity: 0.74,
+      color: "rgba(250, 217, 157, 0.52)",
+      opacity: 0.6,
     },
     {
-      color: "rgba(140, 172, 191, 0.6)",
-      opacity: 0.7,
+      color: "rgba(140, 172, 191, 0.5)",
+      opacity: 0.56,
     },
   ],
   dark: [
@@ -219,6 +220,7 @@ export function createOrganicSimulation({
     width: safeWidth,
     height: safeHeight,
     tone,
+    variant,
     reducedMotion,
     time: 0,
     noise,
@@ -526,10 +528,10 @@ function applyBlobSeparation(
     const dx = blob.x - other.x;
     const dy = blob.y - other.y;
     const dist = Math.hypot(dx, dy);
-    const separation = Math.min(blob.rx + other.rx, blob.ry + other.ry) * 0.36;
+    const separation = Math.min(blob.rx + other.rx, blob.ry + other.ry) * 0.62;
 
     if (dist > 0.01 && dist < separation) {
-      const force = (1 - dist / separation) * 0.32 * dt;
+      const force = (1 - dist / separation) * 0.58 * dt;
       blob.vx += (dx / dist) * force;
       blob.vy += (dy / dist) * force;
     }
@@ -603,11 +605,19 @@ function drawBlob(
 
   context.save();
   context.globalAlpha = blob.opacity;
-  context.filter = `blur(${simulation.width < 640 ? 31 : 26}px)`;
+  context.filter = `blur(${getBlurRadius(simulation)}px)`;
   context.fillStyle = gradient;
   drawSmoothPath(context, blob.nodes);
   context.fill();
   context.restore();
+}
+
+function getBlurRadius(simulation: OrganicSimulation) {
+  if (simulation.variant === "hero") {
+    return simulation.width < 640 ? 39 : 33;
+  }
+
+  return simulation.width < 640 ? 31 : 26;
 }
 
 function drawSmoothPath(

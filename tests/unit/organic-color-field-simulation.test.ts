@@ -194,4 +194,41 @@ describe("organic color field simulation", () => {
 
     expect((after?.x ?? 0) - (start?.x ?? 0)).toBeGreaterThan(0);
   });
+
+  it("repels blob bodies before they visually group together", () => {
+    const simulation = createOrganicSimulation({
+      width: 1000,
+      height: 600,
+      tone: "light",
+      seed: "separation-test",
+    });
+    const [first, second] = simulation.blobs;
+    expect(first).toBeDefined();
+    expect(second).toBeDefined();
+    if (!first || !second) return;
+
+    const translate = (blob: typeof first, nextX: number, nextY: number) => {
+      const dx = nextX - blob.x;
+      const dy = nextY - blob.y;
+      blob.x = nextX;
+      blob.y = nextY;
+      for (const node of blob.nodes) {
+        node.x += dx;
+        node.y += dy;
+      }
+    };
+
+    translate(second, first.x + first.rx * 0.35, first.y);
+    const before = second.x - first.x;
+
+    for (let index = 0; index < 12; index += 1) {
+      stepOrganicSimulation(
+        simulation,
+        { x: 0, y: 0, vx: 0, vy: 0, speed: 0, active: false },
+        16.67,
+      );
+    }
+
+    expect(second.x - first.x).toBeGreaterThan(before);
+  });
 });
