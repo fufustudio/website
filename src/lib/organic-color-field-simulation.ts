@@ -97,6 +97,7 @@ export type OrganicSnapshot = {
 };
 
 const nodeCount = 18;
+const physicsRadiusScale = 0.46;
 
 const toneColors: Record<OrganicTone, BlobColorConfig[]> = {
   light: [
@@ -286,16 +287,18 @@ export function stepOrganicSimulation(
     blob.vx += flow.x * blob.drift * dt;
     blob.vy += flow.y * blob.drift * dt;
 
+    applyRestingSpring(simulation, blob, pointer, dt);
+    applyBlobSeparation(simulation, blob, pointer, dt);
     applyPointerRepulsionField(simulation, blob, pointer, dt);
-    applyBlobSeparation(simulation, blob, dt);
+    applySoftWallForce(simulation, blob, dt);
 
     blob.vx *= 0.972;
     blob.vy *= 0.972;
-    const velocity = clampVector(blob.vx, blob.vy, 5.8);
+    const velocity = clampVector(blob.vx, blob.vy, 6.4);
     const movement = clampVector(
       velocity.x * dt,
       velocity.y * dt,
-      Math.max(3.8, getBlobInteractionRadius(blob) * 0.026),
+      getBlobMovementLimit(blob),
     );
     blob.vx = movement.x / dt;
     blob.vy = movement.y / dt;
@@ -510,8 +513,7 @@ function applyPointerRepulsionField(
   const dx = blob.x - pointer.x;
   const dy = blob.y - pointer.y;
   const dist = Math.hypot(dx, dy);
-  const radius = getBlobInteractionRadius(blob);
-  const { field, clearance } = getPointerFieldRadii(radius);
+  const { field, clearance } = getPointerFieldRadii(blob);
 
   if (dist >= field) {
     decayCursorForce(blob, dt);
@@ -528,14 +530,15 @@ function applyPointerRepulsionField(
   );
   const pressure = getMagneticPressure(dist, field);
   const overlapPressure = getBlobOverlapPressure(simulation, blob);
-  const clusterDamping = 1 - overlapPressure * 0.55;
+  const activeInfluence = Math.max(blob.cursorInfluence, pressure);
   const impulse =
-    (pressure * 0.32 + pressure ** 2 * 0.34) *
-    clusterDamping *
-    (1 / blob.mass) *
-    dt;
+    (pressure * 0.46 + pressure ** 2 * 0.42) * (1 / blob.mass) * dt;
   const drag =
-    1 - Math.min(pressure * (0.025 + overlapPressure * 0.055), 0.085);
+    1 -
+    Math.min(
+      pressure * (0.032 + overlapPressure * (0.064 - activeInfluence * 0.038)),
+      0.1,
+    );
 
   blob.vx *= drag;
   blob.vy *= drag;
@@ -557,8 +560,7 @@ function applyPointerRepulsionField(
     if (nodeDist >= field || nodeDist <= 0.01) continue;
 
     const nodePressure = getMagneticPressure(nodeDist, field);
-    const nodeImpulse =
-      nodePressure * clusterDamping * blob.cursorInfluence * 0.1 * dt;
+    const nodeImpulse = nodePressure * blob.cursorInfluence * 0.04 * dt;
     node.vx += (nodeDx / nodeDist) * nodeImpulse;
     node.vy += (nodeDy / nodeDist) * nodeImpulse;
   }
@@ -573,10 +575,10 @@ function applySmoothedCursorForce(
   pressure: number,
   dt: number,
 ) {
-  const response = 1 - Math.pow(0.955 - pressure * 0.018, dt);
-  const influenceResponse = 1 - Math.pow(0.94, dt);
+  const response = 1 - Math.pow(0.945 - pressure * 0.018, dt);
+  const influenceResponse = 1 - Math.pow(0.9, dt);
 
-  blob.cursorInfluence += (1 - blob.cursorInfluence) * influenceResponse;
+  blob.cursorInfluence += (pressure - blob.cursorInfluence) * influenceResponse;
   blob.cursorForceX += (targetX - blob.cursorForceX) * response;
   blob.cursorForceY += (targetY - blob.cursorForceY) * response;
 }
@@ -589,14 +591,25 @@ function decayCursorForce(blob: OrganicBlob, dt: number) {
   blob.cursorForceY *= decay;
 }
 
-function getBlobInteractionRadius(blob: OrganicBlob) {
+function getBlobVisualRadius(blob: OrganicBlob) {
   return Math.max(blob.rx, blob.ry);
 }
 
-function getPointerFieldRadii(radius: number) {
+function getBlobPhysicsRadius(blob: OrganicBlob) {
+  return getBlobVisualRadius(blob) * physicsRadiusScale;
+}
+
+function getBlobMovementLimit(blob: OrganicBlob) {
+  return clamp(getBlobVisualRadius(blob) * 0.04, 5.5, 12);
+}
+
+function getPointerFieldRadii(blob: OrganicBlob) {
+  const visualRadius = getBlobVisualRadius(blob);
+  const bodyRadius = getBlobPhysicsRadius(blob);
+
   return {
-    field: radius * 1.72,
-    clearance: radius * 0.74,
+    field: visualRadius * 1.65,
+    clearance: bodyRadius * 0.9,
   };
 }
 
@@ -605,7 +618,7 @@ function getMagneticPressure(distance: number, radius: number) {
   const eased =
     proximity * proximity * proximity * (proximity * (proximity * 6 - 15) + 10);
 
-  return eased ** 1.25;
+  return eased ** 1.05;
 }
 
 function getRepulsionDirection(
@@ -653,7 +666,7 @@ function enforcePointerExclusion(
   const dx = blob.x - pointer.x;
   const dy = blob.y - pointer.y;
   const dist = Math.hypot(dx, dy);
-  const { clearance } = getPointerFieldRadii(getBlobInteractionRadius(blob));
+  const { clearance } = getPointerFieldRadii(blob);
 
   if (dist >= clearance) return;
 
@@ -687,29 +700,30 @@ function relaxBlobOutsidePointer(
   if (dist < 0.01) {
     const correction = Math.min(
       penetration,
-      clearance * (0.014 + influence * 0.026),
+      clearance * (0.008 + influence * 0.014),
     );
     translateBlob(blob, awayX * correction, awayY * correction);
-    blob.vx += awayX * correction * 0.0035;
-    blob.vy += awayY * correction * 0.0035;
+    blob.vx += awayX * correction * 0.002;
+    blob.vy += awayY * correction * 0.002;
     containBlob(simulation, blob);
     return;
   }
 
   const pressure = clamp(penetration / clearance, 0, 1);
   const correction = Math.min(
-    penetration * (0.01 + pressure * 0.022) * (0.35 + influence * 0.65) * dt,
-    clearance * (0.014 + influence * 0.026),
+    penetration * (0.006 + pressure * 0.012) * (0.25 + influence * 0.5) * dt,
+    clearance * (0.008 + influence * 0.014),
   );
   translateBlob(blob, awayX * correction, awayY * correction);
-  blob.vx += awayX * correction * 0.0035;
-  blob.vy += awayY * correction * 0.0035;
+  blob.vx += awayX * correction * 0.002;
+  blob.vy += awayY * correction * 0.002;
   containBlob(simulation, blob);
 }
 
 function applyBlobSeparation(
   simulation: OrganicSimulation,
   blob: OrganicBlob,
+  pointer: OrganicPointer,
   dt: number,
 ) {
   for (const other of simulation.blobs) {
@@ -719,12 +733,13 @@ function applyBlobSeparation(
     const dy = blob.y - other.y;
     const dist = Math.hypot(dx, dy);
     const separation =
-      Math.max(blob.rx, blob.ry) * 0.9 + Math.max(other.rx, other.ry) * 0.9;
+      (getBlobPhysicsRadius(blob) + getBlobPhysicsRadius(other)) * 1.18;
 
     if (dist > 0.01 && dist < separation) {
       const pressure = getMagneticPressure(dist, separation);
-      const drag = 1 - Math.min(pressure * 0.065, 0.095);
-      const force = (pressure * 0.54 + pressure ** 2 * 0.48) * dt;
+      const cursorYield = getSeparationYield(blob, other, pointer);
+      const drag = 1 - Math.min(pressure * 0.055 * cursorYield, 0.08);
+      const force = (pressure * 0.42 + pressure ** 2 * 0.32) * cursorYield * dt;
       const awayX = dx / dist;
       const awayY = dy / dist;
 
@@ -741,12 +756,38 @@ function applyBlobSeparation(
         if (nodeDist <= 0.01 || nodeDist >= separation) continue;
 
         const nodePressure = getMagneticPressure(nodeDist, separation);
-        const nodeForce = nodePressure * 0.28 * dt;
+        const nodeForce = nodePressure * 0.18 * cursorYield * dt;
         node.vx += (nodeDx / nodeDist) * nodeForce;
         node.vy += (nodeDy / nodeDist) * nodeForce;
       }
     }
   }
+}
+
+function getSeparationYield(
+  blob: OrganicBlob,
+  other: OrganicBlob,
+  pointer: OrganicPointer,
+) {
+  const cursorInfluence = Math.max(
+    blob.cursorInfluence,
+    other.cursorInfluence,
+    getPointerPressureForBlob(blob, pointer),
+    getPointerPressureForBlob(other, pointer),
+  );
+
+  return clamp(1 - cursorInfluence * 0.9, 0.08, 1);
+}
+
+function getPointerPressureForBlob(blob: OrganicBlob, pointer: OrganicPointer) {
+  if (!pointer.active) return 0;
+
+  const dist = Math.hypot(blob.x - pointer.x, blob.y - pointer.y);
+  const { field } = getPointerFieldRadii(blob);
+
+  if (dist >= field) return 0;
+
+  return getMagneticPressure(dist, field);
 }
 
 function getBlobOverlapPressure(
@@ -761,9 +802,9 @@ function getBlobOverlapPressure(
     const dx = blob.x - other.x;
     const dy = blob.y - other.y;
     const dist = Math.hypot(dx, dy);
-    const radius = getBlobInteractionRadius(blob);
-    const otherRadius = getBlobInteractionRadius(other);
-    const overlapDistance = (radius + otherRadius) * 0.82;
+    const radius = getBlobPhysicsRadius(blob);
+    const otherRadius = getBlobPhysicsRadius(other);
+    const overlapDistance = (radius + otherRadius) * 1.05;
 
     if (dist <= 0.01 || dist >= overlapDistance) continue;
 
@@ -784,6 +825,56 @@ function sampleFlow(simulation: OrganicSimulation, blob: OrganicBlob) {
     x: Math.cos(angle) + lift * 0.35,
     y: Math.sin(angle) * 0.72 + lift,
   };
+}
+
+function applyRestingSpring(
+  simulation: OrganicSimulation,
+  blob: OrganicBlob,
+  pointer: OrganicPointer,
+  dt: number,
+) {
+  const homeX = clamp(
+    simulation.width * blob.xRatio,
+    blob.rx,
+    simulation.width - blob.rx,
+  );
+  const homeY = clamp(
+    simulation.height * blob.yRatio,
+    blob.ry,
+    simulation.height - blob.ry,
+  );
+  const pointerPressure = getPointerPressureForBlob(blob, pointer);
+  const influence = Math.max(blob.cursorInfluence, pointerPressure);
+  const spring = 0.00018 * (1 - influence * 0.75);
+
+  blob.vx += (homeX - blob.x) * spring * dt;
+  blob.vy += (homeY - blob.y) * spring * dt;
+}
+
+function applySoftWallForce(
+  simulation: OrganicSimulation,
+  blob: OrganicBlob,
+  dt: number,
+) {
+  const bounds = getNodeBounds(blob);
+  const margin = Math.max(24, getBlobVisualRadius(blob) * 0.16);
+  const force = 0.35 * dt;
+  let x = 0;
+  let y = 0;
+
+  x += getWallPressure(bounds.minX, margin);
+  x -= getWallPressure(simulation.width - bounds.maxX, margin);
+  y += getWallPressure(bounds.minY, margin);
+  y -= getWallPressure(simulation.height - bounds.maxY, margin);
+
+  blob.vx += x * force;
+  blob.vy += y * force;
+}
+
+function getWallPressure(clearance: number, margin: number) {
+  const pressure = clamp((margin - clearance) / margin, 0, 1);
+
+  return pressure * pressure;
 }
 
 function containBlob(simulation: OrganicSimulation, blob: OrganicBlob) {

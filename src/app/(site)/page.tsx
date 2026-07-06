@@ -1,11 +1,11 @@
 import { CursorBubble } from "@/components/site/cursor-bubble";
+import { HashScrollLink } from "@/components/site/hash-scroll-link";
 import { LetteredHeroTitle } from "@/components/site/lettered-hero-title";
 import { OrganicColorField } from "@/components/site/organic-color-field";
 import { SectionMarker } from "@/components/site/section-marker";
 import { ServicesExplorer } from "@/components/site/services-explorer";
 import { TeamMemberCard } from "@/components/site/team-member-card";
 import { Container } from "@/components/ui/container";
-import { ButtonLink } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
 import { getHomePage } from "@/lib/cms";
 import { pageMetadata } from "@/lib/seo";
@@ -33,13 +33,13 @@ export default async function Home() {
         <Container size="xl" className={styles.heroInner}>
           <LetteredHeroTitle text={page.title} />
           <p className={styles.heroBody}>{page.description}</p>
-          <ButtonLink
-            href={page.heroCta.href}
+          <HashScrollLink
+            href={page.heroCta.href as `#${string}`}
             size="sm"
             className={styles.heroCta}
           >
             {page.heroCta.label}
-          </ButtonLink>
+          </HashScrollLink>
         </Container>
       </Section>
 

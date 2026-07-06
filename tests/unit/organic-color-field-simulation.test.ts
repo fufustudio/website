@@ -125,6 +125,12 @@ describe("organic color field simulation", () => {
       tone: "light",
       seed: "stationary-repel-test",
     });
+    const idle = createOrganicSimulation({
+      width: 1000,
+      height: 600,
+      tone: "light",
+      seed: "stationary-repel-test",
+    });
     const start = getOrganicSnapshot(simulation).blobs[0];
     expect(start).toBeDefined();
     const radius =
@@ -134,6 +140,11 @@ describe("organic color field simulation", () => {
       ) * 0.5;
 
     for (let index = 0; index < 60; index += 1) {
+      stepOrganicSimulation(
+        idle,
+        { x: 0, y: 0, vx: 0, vy: 0, speed: 0, active: false },
+        16.67,
+      );
       stepOrganicSimulation(
         simulation,
         {
@@ -149,8 +160,9 @@ describe("organic color field simulation", () => {
     }
 
     const after = getOrganicSnapshot(simulation).blobs[0];
+    const idleAfter = getOrganicSnapshot(idle).blobs[0];
 
-    expect((after?.x ?? 0) - (start?.x ?? 0)).toBeGreaterThan(0);
+    expect((after?.x ?? 0) - (idleAfter?.x ?? 0)).toBeGreaterThan(0);
   });
 
   it("keeps cursor repulsion independent from cursor velocity", () => {
@@ -351,7 +363,7 @@ describe("organic color field simulation", () => {
       speed: 0,
       active: true,
     };
-    const gentleClearance = Math.max(blob.rx, blob.ry) * 0.74;
+    const gentleClearance = getBodyRadiusForTest(blob) * 0.9;
 
     for (let index = 0; index < 160; index += 1) {
       stepOrganicSimulation(simulation, pointer, 16.67);
@@ -397,6 +409,220 @@ describe("organic color field simulation", () => {
     }
 
     expect(previousDistance).toBeGreaterThan(first.rx * 0.35);
+  });
+
+  it("does not park idle blobs in section corners", () => {
+    const simulation = createOrganicSimulation({
+      width: 1000,
+      height: 600,
+      tone: "light",
+      seed: "idle-corner-test",
+    });
+
+    for (const blob of simulation.blobs) {
+      blob.drift = 0;
+    }
+
+    for (let index = 0; index < 720; index += 1) {
+      stepOrganicSimulation(
+        simulation,
+        { x: 0, y: 0, vx: 0, vy: 0, speed: 0, active: false },
+        16.67,
+      );
+    }
+
+    const snapshot = getOrganicSnapshot(simulation);
+
+    for (const blob of snapshot.blobs) {
+      const nearHorizontalWall =
+        blob.minX <= 1 || blob.maxX >= snapshot.width - 1;
+      const nearVerticalWall =
+        blob.minY <= 1 || blob.maxY >= snapshot.height - 1;
+
+      expect(nearHorizontalWall && nearVerticalWall).toBe(false);
+    }
+  });
+
+  it("lets a resting cursor slowly herd a wall-adjacent blob inward", () => {
+    const simulation = createOrganicSimulation({
+      width: 1000,
+      height: 600,
+      tone: "light",
+      seed: "wall-herding-test",
+    });
+    const blob = simulation.blobs[0];
+    expect(blob).toBeDefined();
+    if (!blob) return;
+
+    for (const currentBlob of simulation.blobs) {
+      currentBlob.drift = 0;
+    }
+
+    const startX = blob.x;
+    const pointer = {
+      x: blob.x - blob.rx * 0.7,
+      y: blob.y,
+      vx: 0,
+      vy: 0,
+      speed: 0,
+      active: true,
+    };
+
+    for (let index = 0; index < 120; index += 1) {
+      stepOrganicSimulation(simulation, pointer, 16.67);
+    }
+
+    expect(blob.x - startX).toBeGreaterThan(getBodyRadiusForTest(blob) * 0.08);
+    expect(
+      getOrganicSnapshot(simulation).blobs[0]?.minX,
+    ).toBeGreaterThanOrEqual(0);
+  });
+
+  it("settles cursor-driven motion after the cursor leaves", () => {
+    const simulation = createOrganicSimulation({
+      width: 1000,
+      height: 600,
+      tone: "light",
+      seed: "settle-after-cursor-test",
+    });
+    const blob = simulation.blobs[0];
+    expect(blob).toBeDefined();
+    if (!blob) return;
+
+    for (const currentBlob of simulation.blobs) {
+      currentBlob.drift = 0;
+    }
+
+    const pointer = {
+      x: blob.x - blob.rx * 0.65,
+      y: blob.y,
+      vx: 0,
+      vy: 0,
+      speed: 0,
+      active: true,
+    };
+    let maxDrivenSpeed = 0;
+
+    for (let index = 0; index < 120; index += 1) {
+      stepOrganicSimulation(simulation, pointer, 16.67);
+      maxDrivenSpeed = Math.max(maxDrivenSpeed, Math.hypot(blob.vx, blob.vy));
+    }
+
+    for (let index = 0; index < 360; index += 1) {
+      stepOrganicSimulation(
+        simulation,
+        { x: 0, y: 0, vx: 0, vy: 0, speed: 0, active: false },
+        16.67,
+      );
+    }
+
+    expect(Math.hypot(blob.vx, blob.vy)).toBeLessThan(maxDrivenSpeed * 0.55);
+  });
+
+  it("lets cursor influence temporarily soften blob separation", () => {
+    const idle = createOrganicSimulation({
+      width: 1000,
+      height: 600,
+      tone: "light",
+      seed: "separation-yield-test",
+    });
+    const active = createOrganicSimulation({
+      width: 1000,
+      height: 600,
+      tone: "light",
+      seed: "separation-yield-test",
+    });
+    const [idleFirst, idleSecond] = idle.blobs;
+    const [activeFirst, activeSecond] = active.blobs;
+    expect(idleFirst).toBeDefined();
+    expect(idleSecond).toBeDefined();
+    expect(activeFirst).toBeDefined();
+    expect(activeSecond).toBeDefined();
+    if (!idleFirst || !idleSecond || !activeFirst || !activeSecond) return;
+
+    for (const simulation of [idle, active]) {
+      for (const blob of simulation.blobs) {
+        blob.drift = 0;
+      }
+    }
+
+    translateBlobForTest(
+      idleSecond,
+      idleFirst.x + idleFirst.rx * 0.35,
+      idleFirst.y,
+    );
+    translateBlobForTest(
+      activeSecond,
+      activeFirst.x + activeFirst.rx * 0.35,
+      activeFirst.y,
+    );
+    activeFirst.cursorInfluence = 1;
+    activeSecond.cursorInfluence = 1;
+
+    stepOrganicSimulation(
+      idle,
+      { x: 0, y: 0, vx: 0, vy: 0, speed: 0, active: false },
+      16.67,
+    );
+    stepOrganicSimulation(
+      active,
+      { x: 0, y: 0, vx: 0, vy: 0, speed: 0, active: false },
+      16.67,
+    );
+
+    const idleDistance = Math.hypot(
+      idleSecond.x - idleFirst.x,
+      idleSecond.y - idleFirst.y,
+    );
+    const activeDistance = Math.hypot(
+      activeSecond.x - activeFirst.x,
+      activeSecond.y - activeFirst.y,
+    );
+
+    expect(activeDistance).toBeLessThan(idleDistance);
+  });
+
+  it("lets cursor pressure overcome stacked blob separation", () => {
+    const simulation = createOrganicSimulation({
+      width: 1000,
+      height: 600,
+      tone: "light",
+      seed: "cursor-overcomes-separation-test",
+    });
+    const [first, second, third] = simulation.blobs;
+    expect(first).toBeDefined();
+    expect(second).toBeDefined();
+    expect(third).toBeDefined();
+    if (!first || !second || !third) return;
+
+    for (const blob of simulation.blobs) {
+      blob.drift = 0;
+    }
+
+    translateBlobForTest(second, first.x + first.rx * 0.12, first.y);
+    translateBlobForTest(third, first.x - first.rx * 0.12, first.y);
+    const before = getOrganicSnapshot(simulation);
+
+    for (let index = 0; index < 18; index += 1) {
+      stepOrganicSimulation(
+        simulation,
+        {
+          x: first.x - first.rx * 0.35,
+          y: first.y,
+          vx: 0,
+          vy: 0,
+          speed: 0,
+          active: true,
+        },
+        16.67,
+      );
+    }
+
+    const after = getOrganicSnapshot(simulation);
+    const firstMove = after.blobs[0]?.x ?? 0;
+    const previousFirst = before.blobs[0]?.x ?? 0;
+
+    expect(firstMove).toBeGreaterThan(previousFirst);
   });
 
   it("keeps stacked blobs from jumping under cursor pressure", () => {
@@ -445,6 +671,10 @@ describe("organic color field simulation", () => {
     expect(maxMovement).toBeLessThan(first.rx * 0.14);
   });
 });
+
+function getBodyRadiusForTest(blob: OrganicBlob) {
+  return Math.max(blob.rx, blob.ry) * 0.46;
+}
 
 function translateBlobForTest(blob: OrganicBlob, nextX: number, nextY: number) {
   const dx = nextX - blob.x;

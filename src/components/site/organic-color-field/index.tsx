@@ -112,6 +112,7 @@ export function OrganicColorField({
 
     const onPointerMove = (event: PointerEvent) => {
       const now = performance.now();
+      rootRect = root.getBoundingClientRect();
 
       if (hasPointer) {
         const dt = Math.max(8, Math.min(64, now - lastPointerTime));
@@ -126,11 +127,25 @@ export function OrganicColorField({
 
       pointer.x = event.clientX - rootRect.left;
       pointer.y = event.clientY - rootRect.top;
-      pointer.active = true;
+      const interactionMargin = Math.max(
+        120,
+        Math.min(360, Math.max(rootRect.width, rootRect.height) * 0.25),
+      );
+      pointer.active =
+        pointer.x >= -interactionMargin &&
+        pointer.x <= rootRect.width + interactionMargin &&
+        pointer.y >= -interactionMargin &&
+        pointer.y <= rootRect.height + interactionMargin;
       lastPointerClientX = event.clientX;
       lastPointerClientY = event.clientY;
       lastPointerTime = now;
-      hasPointer = true;
+      hasPointer = pointer.active;
+
+      if (!pointer.active) {
+        pointer.vx = 0;
+        pointer.vy = 0;
+        pointer.speed = 0;
+      }
     };
 
     const onPointerLeave = () => {
