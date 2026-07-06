@@ -27,6 +27,12 @@ export const page = defineType({
       rows: 3,
     }),
     defineField({
+      name: "about",
+      title: "About Section",
+      type: "aboutSection",
+      description: "Optional home page team section content.",
+    }),
+    defineField({
       name: "body",
       title: "Body",
       type: "simplePortableText",

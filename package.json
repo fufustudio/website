@@ -33,6 +33,7 @@
     "lhci": "lhci autorun",
     "analyze": "ANALYZE=true next build",
     "sanity:seed": "sanity exec scripts/seed-sanity.ts --with-user-token",
+    "sanity:seed-home": "sanity exec scripts/seed-home-content.ts --with-user-token",
     "verify:content": "npm run sanity:validate-content",
     "sanity:validate-content": "sanity exec scripts/validate-sanity-content.ts",
     "sanity:repair-keys": "sanity exec scripts/repair-sanity-array-keys.ts --with-user-token"

@@ -3,7 +3,14 @@ import type { PortableTextBlock } from "@portabletext/react";
 
 import { client, isSanityConfigured } from "@/sanity/lib/client";
 import { homePageContent } from "@/content/home";
+import {
+  imageBlurData,
+  imageObjectPosition,
+  imageSrc,
+  type SanityImageValue,
+} from "@/lib/cms-images";
 import { site } from "@/content/site";
+import type { ResponsiveImageContent } from "@/lib/responsive-image";
 
 export type RichText = PortableTextBlock[];
 
@@ -74,10 +81,12 @@ export type HomePageContent = {
     heading: string;
     intro: string;
     people: readonly {
+      _key?: string;
       role: string;
       name: string;
       href: string;
       placeholder: string;
+      portrait?: ResponsiveImageContent;
       bio: string;
     }[];
   };
@@ -93,7 +102,22 @@ export type PageContent = {
   description?: string;
   intro?: string;
   features?: FeatureContent[];
+  about?: {
+    eyebrow?: string;
+    heading?: string;
+    intro?: string;
+    people?: CmsTeamMember[];
+  };
   body?: RichText;
+};
+
+type CmsTeamMember = {
+  _key?: string;
+  role?: string;
+  name?: string;
+  href?: string;
+  portrait?: SanityImageValue;
+  bio?: string;
 };
 
 export type PostMeta = {
@@ -125,6 +149,31 @@ const homePageQuery = defineQuery(/* groq */ `
   *[_type == "page" && slug.current == "home"][0]{
     title,
     description,
+    about{
+      eyebrow,
+      heading,
+      intro,
+      people[]{
+        _key,
+        role,
+        name,
+        href,
+        bio,
+        portrait{
+          asset->{
+            _id,
+            url,
+            metadata {
+              lqip,
+              dimensions { width, height }
+            }
+          },
+          alt,
+          hotspot,
+          crop
+        }
+      }
+    },
     body
   }
 `);
@@ -176,6 +225,7 @@ export async function getHomePage(): Promise<HomePageContent> {
     ...homePageContent,
     title: page?.title ?? homePageContent.title,
     description: page?.description ?? homePageContent.description,
+    about: mapAboutSection(page?.about),
     services: {
       ...homePageContent.services,
       items:
@@ -190,5 +240,58 @@ export async function getHomePage(): Promise<HomePageContent> {
             }))
           : homePageContent.services.items,
     },
+  };
+}
+
+const teamPortraitSizes =
+  "(min-width: 1200px) 528px, (min-width: 640px) calc(50vw - 3.5rem), calc(100vw - 3rem)";
+
+function mapAboutSection(
+  about: PageContent["about"],
+): HomePageContent["about"] {
+  if (!about) return homePageContent.about;
+
+  const people =
+    about.people && about.people.length > 0
+      ? about.people.map((person, index) => {
+          const fallback = homePageContent.about.people[index];
+          const role = person.role ?? fallback?.role ?? "";
+
+          return {
+            _key: person._key,
+            role,
+            name: person.name ?? fallback?.name ?? "",
+            href: person.href ?? fallback?.href ?? "",
+            placeholder: fallback?.placeholder ?? `${role || "Team"} portrait`,
+            portrait: mapSanityPortrait(person.portrait) ?? fallback?.portrait,
+            bio: person.bio ?? fallback?.bio ?? "",
+          };
+        })
+      : homePageContent.about.people;
+
+  return {
+    eyebrow: about.eyebrow ?? homePageContent.about.eyebrow,
+    heading: about.heading ?? homePageContent.about.heading,
+    intro: about.intro ?? homePageContent.about.intro,
+    people,
+  };
+}
+
+function mapSanityPortrait(
+  portrait: SanityImageValue,
+): ResponsiveImageContent | undefined {
+  const src = imageSrc(portrait);
+  if (!src) return undefined;
+
+  const blurDataURL = imageBlurData(portrait);
+
+  return {
+    src,
+    alt: portrait?.alt ?? "",
+    sizes: teamPortraitSizes,
+    quality: 75,
+    placeholder: blurDataURL ? "blur" : undefined,
+    blurDataURL,
+    objectPosition: imageObjectPosition(portrait),
   };
 }

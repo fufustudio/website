@@ -5,11 +5,13 @@ import { post } from "./documents/post";
 import { service } from "./documents/service";
 import { siteSettings } from "./documents/siteSettings";
 import {
+  aboutSection,
   address,
   cta,
   imageWithAlt,
   pageHeader,
   simplePortableText,
+  teamMember,
 } from "./objects/shared";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
@@ -17,6 +19,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     address,
     cta,
     imageWithAlt,
+    teamMember,
+    aboutSection,
     pageHeader,
     simplePortableText,
     siteSettings,

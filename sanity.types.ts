@@ -77,7 +77,20 @@ export type Page = {
   title: string;
   slug: Slug;
   description?: string;
+  about?: AboutSection;
   body?: SimplePortableText;
+};
+
+export type AboutSection = {
+  _type: "aboutSection";
+  eyebrow?: string;
+  heading: string;
+  intro?: string;
+  people?: Array<
+    {
+      _key: string;
+    } & TeamMember
+  >;
 };
 
 export type SiteSettings = {
@@ -115,6 +128,15 @@ export type PageHeader = {
   eyebrow?: string;
   heading: string;
   intro?: string;
+};
+
+export type TeamMember = {
+  _type: "teamMember";
+  role: string;
+  name: string;
+  href?: string;
+  portrait?: ImageWithAlt;
+  bio: string;
 };
 
 export type SanityImageAssetReference = {
@@ -258,9 +280,11 @@ export type AllSanitySchemaTypes =
   | Slug
   | Service
   | Page
+  | AboutSection
   | SiteSettings
   | Address
   | PageHeader
+  | TeamMember
   | SanityImageAssetReference
   | ImageWithAlt
   | SanityImageCrop
@@ -295,10 +319,38 @@ export type SiteSettingsQueryResult = {
 
 // Source: src/lib/cms.ts
 // Variable: homePageQuery
-// Query: *[_type == "page" && slug.current == "home"][0]{    title,    description,    body  }
+// Query: *[_type == "page" && slug.current == "home"][0]{    title,    description,    about{      eyebrow,      heading,      intro,      people[]{        _key,        role,        name,        href,        bio,        portrait{          asset->{            _id,            url,            metadata {              lqip,              dimensions { width, height }            }          },          alt,          hotspot,          crop        }      }    },    body  }
 export type HomePageQueryResult = {
   title: string;
   description: string | null;
+  about: {
+    eyebrow: string | null;
+    heading: string;
+    intro: string | null;
+    people: Array<{
+      _key: string;
+      role: string;
+      name: string;
+      href: string | null;
+      bio: string;
+      portrait: {
+        asset: {
+          _id: string;
+          url: string;
+          metadata: {
+            lqip: string | null;
+            dimensions: {
+              width: number;
+              height: number;
+            } | null;
+          } | null;
+        } | null;
+        alt: string;
+        hotspot: SanityImageHotspot | null;
+        crop: SanityImageCrop | null;
+      } | null;
+    }> | null;
+  } | null;
   body: SimplePortableText | null;
 } | null;
 
@@ -319,7 +371,7 @@ import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     '\n  *[_type == "siteSettings" && _id == "siteSettings"][0]{\n    name,\n    contactName,\n    email,\n    phone,\n    address,\n    hours,\n    primaryActionLabel,\n    primaryActionUrl,\n    url,\n    tagline,\n    areaServed,\n    sameAs\n  }\n': SiteSettingsQueryResult;
-    '\n  *[_type == "page" && slug.current == "home"][0]{\n    title,\n    description,\n    body\n  }\n': HomePageQueryResult;
+    '\n  *[_type == "page" && slug.current == "home"][0]{\n    title,\n    description,\n    about{\n      eyebrow,\n      heading,\n      intro,\n      people[]{\n        _key,\n        role,\n        name,\n        href,\n        bio,\n        portrait{\n          asset->{\n            _id,\n            url,\n            metadata {\n              lqip,\n              dimensions { width, height }\n            }\n          },\n          alt,\n          hotspot,\n          crop\n        }\n      }\n    },\n    body\n  }\n': HomePageQueryResult;
     '\n  *[_type == "service" && active != false] | order(order asc, title asc) {\n    _key,\n    title,\n    "slug": slug.current,\n    summary,\n    capabilities,\n    order\n  }\n': ServicesQueryResult;
   }
 }

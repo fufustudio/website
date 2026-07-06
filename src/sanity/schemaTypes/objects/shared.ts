@@ -1,4 +1,10 @@
-import { ComposeIcon, DocumentsIcon, ImageIcon, LinkIcon } from "@sanity/icons";
+import {
+  ComposeIcon,
+  DocumentsIcon,
+  ImageIcon,
+  LinkIcon,
+  UserIcon,
+} from "@sanity/icons";
 import { defineArrayMember, defineField, defineType } from "sanity";
 
 export const imageWithAlt = defineType({
@@ -98,6 +104,86 @@ export const pageHeader = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({ name: "intro", title: "Intro", type: "text", rows: 3 }),
+  ],
+});
+
+export const teamMember = defineType({
+  name: "teamMember",
+  title: "Team Member",
+  type: "object",
+  icon: UserIcon,
+  fields: [
+    defineField({
+      name: "role",
+      title: "Role",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "name",
+      title: "Name",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "href",
+      title: "Profile URL",
+      type: "url",
+      validation: (rule) =>
+        rule.uri({ scheme: ["http", "https"], allowRelative: false }),
+    }),
+    defineField({
+      name: "portrait",
+      title: "Portrait",
+      type: "imageWithAlt",
+    }),
+    defineField({
+      name: "bio",
+      title: "Bio",
+      type: "text",
+      rows: 3,
+      validation: (rule) => rule.required(),
+    }),
+  ],
+  preview: {
+    select: {
+      title: "name",
+      subtitle: "role",
+      media: "portrait",
+    },
+  },
+});
+
+export const aboutSection = defineType({
+  name: "aboutSection",
+  title: "About Section",
+  type: "object",
+  icon: UserIcon,
+  fields: [
+    defineField({
+      name: "eyebrow",
+      title: "Eyebrow",
+      type: "string",
+    }),
+    defineField({
+      name: "heading",
+      title: "Heading",
+      type: "string",
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "intro",
+      title: "Intro",
+      type: "text",
+      rows: 3,
+    }),
+    defineField({
+      name: "people",
+      title: "People",
+      type: "array",
+      of: [defineArrayMember({ type: "teamMember" })],
+      validation: (rule) => rule.min(1),
+    }),
   ],
 });
 
