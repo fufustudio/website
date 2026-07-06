@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const routes = ["/"];
+const routes = ["/", "/privacy"];
 
 test.describe("public routes", () => {
   for (const route of routes) {
@@ -30,8 +30,10 @@ test("home exposes the message form", async ({ page }) => {
   await page.goto("/");
 
   await expect(
-    page.getByRole("heading", { name: /hello world/i }),
+    page.getByRole("heading", { name: /fufu studio/i }),
   ).toBeVisible();
+  await expect(page.getByRole("textbox", { name: /name/i })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: /email/i })).toBeVisible();
   await expect(page.getByRole("textbox", { name: /message/i })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Send" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send it" })).toBeVisible();
 });

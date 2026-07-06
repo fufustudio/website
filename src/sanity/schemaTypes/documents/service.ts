@@ -1,5 +1,5 @@
 import { TagIcon } from "@sanity/icons";
-import { defineField, defineType } from "sanity";
+import { defineArrayMember, defineField, defineType } from "sanity";
 
 export const service = defineType({
   name: "service",
@@ -25,6 +25,13 @@ export const service = defineType({
       title: "Summary",
       type: "text",
       rows: 3,
+    }),
+    defineField({
+      name: "capabilities",
+      title: "Capability chips",
+      type: "array",
+      of: [defineArrayMember({ type: "string" })],
+      validation: (rule) => rule.max(8),
     }),
     defineField({
       name: "icon",

@@ -20,6 +20,7 @@ vi.mock("resend", () => ({
 import { POST } from "@/app/api/contact/route";
 
 const validPayload = {
+  name: "Test Sender",
   email: "sender@example.com",
   message: "Testing the launch form.",
   source: "home",
@@ -73,6 +74,18 @@ describe("POST /api/contact", () => {
     expect(sendMock).not.toHaveBeenCalled();
   });
 
+  it("rejects missing name submissions", async () => {
+    const res = await POST(jsonRequest({ ...validPayload, name: "" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({
+      success: false,
+      message: "Please enter your name.",
+    });
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid email submissions", async () => {
     const res = await POST(jsonRequest({ ...validPayload, email: "nope" }));
     const body = await res.json();
@@ -96,7 +109,7 @@ describe("POST /api/contact", () => {
     });
 
     const oversized = await POST(
-      jsonRequest({ ...validPayload, message: "x".repeat(501) }),
+      jsonRequest({ ...validPayload, message: "x".repeat(1201) }),
     );
     const oversizedBody = await oversized.json();
 
@@ -126,7 +139,7 @@ describe("POST /api/contact", () => {
         replyTo: "sender@example.com",
         subject: "New website contact",
         text: expect.stringMatching(
-          /Email: sender@example\.com[\s\S]*Message: Testing the launch form\./,
+          /Name: Test Sender[\s\S]*Email: sender@example\.com[\s\S]*Message: Testing the launch form\./,
         ),
         react: expect.anything(),
       }),

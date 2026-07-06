@@ -1,0 +1,79 @@
+.card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.375rem);
+}
+
+.portrait {
+  display: flex;
+  aspect-ratio: 1 / 0.72;
+  min-height: 300px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  border: 1px solid rgb(18 19 26 / 0.1);
+  border-radius: 8px;
+  background: rgb(18 19 26 / 0.05);
+  color: rgb(18 19 26 / 0.64);
+  font-size: 12px;
+}
+
+.placeholderIcon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  line-height: 1;
+}
+
+.copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.5rem;
+}
+
+.role {
+  margin: 0;
+  color: rgb(18 19 26 / 0.64);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.name {
+  margin: 0;
+  font-size: clamp(1.625rem, 3.4vw, 2.625rem);
+  line-height: 1.05;
+}
+
+.name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.name a:hover {
+  color: rgb(18 19 26 / 0.72);
+}
+
+.bio {
+  max-width: min(100%, 40ch);
+  margin: 0;
+  color: rgb(18 19 26 / 0.72);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .portrait {
+    min-height: clamp(340px, 34vw, 470px);
+  }
+}

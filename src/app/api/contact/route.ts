@@ -3,6 +3,7 @@ import { ContactNotificationEmail } from "@/components/email/contact-notificatio
 import { optionalEnvValue } from "@/lib/env";
 
 type InquiryPayload = {
+  name?: unknown;
   email?: unknown;
   message?: unknown;
   source?: unknown;
@@ -11,18 +12,21 @@ type InquiryPayload = {
 };
 
 type Inquiry = {
+  name: string;
   email: string;
   message: string;
   source: string;
 };
 
 const fieldLimits = {
+  name: 120,
   email: 254,
-  message: 500,
+  message: 1200,
   source: 80,
 };
 
 const destinationEmail = "hello@fufu.studio";
+const nameError = "Please enter your name.";
 const emailError = "Please enter a valid email address.";
 const validationError = "Please enter a short message.";
 const lengthError = "Please shorten your message and try again.";
@@ -105,6 +109,7 @@ function isHoneypotSubmission(payload: InquiryPayload) {
 
 function normalizeInquiry(payload: InquiryPayload): Inquiry {
   return {
+    name: normalizeField(payload.name),
     email: normalizeField(payload.email).toLowerCase(),
     message: normalizeField(payload.message),
     source: normalizeField(payload.source) || "home",
@@ -117,11 +122,16 @@ function normalizeField(value: unknown) {
 
 function validateInquiry(inquiry: Inquiry) {
   if (
+    inquiry.name.length > fieldLimits.name ||
     inquiry.email.length > fieldLimits.email ||
     inquiry.message.length > fieldLimits.message ||
     inquiry.source.length > fieldLimits.source
   ) {
     return lengthError;
+  }
+
+  if (!inquiry.name) {
+    return nameError;
   }
 
   if (!isValidEmail(inquiry.email)) {
@@ -141,6 +151,7 @@ function isValidEmail(value: string) {
 
 function inquiryText(inquiry: Inquiry) {
   return [
+    `Name: ${inquiry.name}`,
     `Email: ${inquiry.email}`,
     `Message: ${inquiry.message}`,
     `Source: ${inquiry.source}`,

@@ -1,41 +1,48 @@
 @import "tailwindcss";
 
 /* ============================================================
-   THEME CONTRACT — to rebrand, edit only this block (and the
+   THEME CONTRACT - to rebrand, edit only this block (and the
    three font families in layout.tsx). Markup references roles
    (bg-surface, text-accent, tone="feature"…), never color names,
    so a new direction means new values here and nothing else.
    ============================================================ */
 @theme {
-  --color-bg: #eae6dd; /* page background */
-  --color-fg: #3a232a; /* headings and dark bands */
-  --color-body: #40383a; /* body copy (softer than fg) */
-  --color-surface: #fbf8f1; /* cards / raised panels */
-  --color-muted: rgb(241 238 235 / 0.9); /* hairline borders, card edges */
-  --color-accent: #6f2e39; /* links, eyebrows, emphasis */
-  --color-accent-soft: #e3c7cb; /* selection and subtle fills */
-  --color-feature: #efe2d6; /* warm feature band */
-  --color-light: #fffaf4; /* type on dark / image bands */
-  --color-cream: #e5ded9; /* alternate cream text / translucent overlays */
-  --color-icon: #c79da4; /* feature icon accents */
-  --color-field-surface: #2a2025;
-  --color-field-surface-focus: #21191d;
-  --color-button-primary-hover: #52333b;
-  --color-nav-overlay-cool: rgb(18 46 58 / 0.3);
-  --color-nav-overlay-warm: rgb(37 31 18 / 0.25);
-  --color-nav-overlay-deep: rgb(7 24 25 / 0.3);
-  --color-nav-surface-overlay: #e5ded9;
-  --color-interactive-hover: rgb(241 238 235 / 0.24);
+  --color-bg: #f6f4ef;
+  --color-fg: #12131a;
+  --color-body: rgb(18 19 26 / 0.72);
+  --color-surface: rgb(18 19 26 / 0.05);
+  --color-muted: rgb(18 19 26 / 0.14);
+  --color-accent: #375d6c;
+  --color-accent-soft: #fad99d;
+  --color-feature: #dead89;
+  --color-light: #f6f4ef;
+  --color-cream: rgb(246 244 239 / 0.82);
+  --color-icon: rgb(18 19 26 / 0.32);
+  --color-field-surface: rgb(246 244 239 / 0.06);
+  --color-field-surface-focus: rgb(246 244 239 / 0.1);
+  --color-button-primary-hover: rgb(18 19 26 / 0.82);
+  --color-nav-overlay-cool: rgb(246 244 239 / 0.78);
+  --color-nav-overlay-warm: rgb(246 244 239 / 0.78);
+  --color-nav-overlay-deep: rgb(18 19 26 / 0.78);
+  --color-nav-surface-overlay: rgb(246 244 239 / 0.9);
+  --color-interactive-hover: rgb(18 19 26 / 0.06);
+  --color-spectrum-clay: #dead89;
+  --color-spectrum-yellow: #fad99d;
+  --color-spectrum-blue: #8cacbf;
+  --color-spectrum-dark-clay: rgb(74 49 29);
+  --color-spectrum-dark-bronze: rgb(69 55 28);
+  --color-spectrum-dark-blue: rgb(30 50 66);
+  --color-divider-dark: rgb(246 244 239 / 0.16);
 
-  --font-heading: var(--font-baskerville);
-  --font-body: var(--font-baskerville);
-  --font-sans: var(--font-manrope);
-  --font-mono: var(--font-plex-mono);
+  --font-heading: var(--font-instrument-serif);
+  --font-body: var(--font-instrument-sans);
+  --font-sans: var(--font-instrument-sans);
+  --font-mono: var(--font-dm-mono);
   --radius-btn: 9999px;
   --radius-card: 8px;
   --radius-media: 8px;
   --radius-panel: 8px;
-  --shadow-card: 0 24px 60px rgb(58 35 42 / 0.08);
+  --shadow-card: 0 24px 60px rgb(18 19 26 / 0.08);
   --space-section-compact: clamp(3rem, 7vw, 4rem);
   --space-section-default: clamp(4rem, 8vw, 5rem);
   --space-section-spacious: clamp(5rem, 10vw, 8rem);
@@ -44,17 +51,18 @@
 
 @layer base {
   body {
+    overflow-x: hidden;
     background-color: var(--color-bg);
     color: var(--color-body);
-    font-family: var(--font-body), Georgia, serif;
+    font-family: var(--font-body), system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
 
   ::selection {
-    background: var(--color-accent-soft);
-    color: var(--color-fg);
+    background: var(--color-fg);
+    color: var(--color-light);
   }
 
   h1,
@@ -198,11 +206,11 @@
   }
 
   .heading-display {
-    font-size: clamp(2.6rem, 7vw, 66px);
+    font-size: clamp(3.25rem, 10vw, 140px);
   }
 
   .heading-section {
-    font-size: clamp(2rem, 5.5vw, 44px);
+    font-size: clamp(2rem, 5.2vw, 64px);
   }
 
   .heading-module {
@@ -213,22 +221,22 @@
     font-size: clamp(1.25rem, 3vw, 24px);
   }
 
-  /* Manrope eyebrow — small uppercase label above headings */
+  /* Small uppercase label above headings */
   .eyebrow {
     font-family: var(--font-sans), system-ui, sans-serif;
-    font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 0.22em;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-accent);
   }
 
-  /* IBM Plex Mono label — nav, step numbers, footer captions */
+  /* Mono label for nav, step numbers, footer captions */
   .mono-label {
     font-family: var(--font-mono), ui-monospace, monospace;
     font-weight: 500;
     font-size: 13px;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 

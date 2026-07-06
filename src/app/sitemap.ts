@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site-defaults";
 
-const staticRoutes = [""] as const;
+const staticRoutes = ["", "/privacy"] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

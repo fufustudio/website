@@ -2,14 +2,15 @@ import { SITE_URL } from "@/lib/site-defaults";
 import type { SiteSettings } from "@/lib/cms";
 
 export const site = {
-  name: "Fufu",
-  contactName: "Fufu",
+  name: "Fufu Studio",
+  contactName: "Fufu Studio",
   email: "hello@fufu.studio",
   hours: [],
-  primaryActionLabel: "Send email",
-  primaryActionUrl: "/",
+  primaryActionLabel: "Start a project",
+  primaryActionUrl: "/#contact",
   url: SITE_URL,
-  tagline: "Hello world, powered by Sanity.",
+  tagline:
+    "Building bespoke sites and software for businesses who care how they show up online.",
   areaServed: [],
   sameAs: [],
 } satisfies SiteSettings;

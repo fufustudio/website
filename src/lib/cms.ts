@@ -2,6 +2,7 @@ import { defineQuery, type QueryParams } from "next-sanity";
 import type { PortableTextBlock } from "@portabletext/react";
 
 import { client, isSanityConfigured } from "@/sanity/lib/client";
+import { homePageContent } from "@/content/home";
 import { site } from "@/content/site";
 
 export type RichText = PortableTextBlock[];
@@ -36,6 +37,55 @@ export type FeatureContent = {
   slug: string;
   icon: FeatureIcon;
   summary?: string;
+};
+
+export type ServiceContent = {
+  _key?: string;
+  num: string;
+  title: string;
+  slug?: string;
+  summary: string;
+  capabilities: readonly string[];
+};
+
+export type HomePageContent = {
+  title: string;
+  description: string;
+  heroCta: {
+    label: string;
+    href: string;
+  };
+  ethos: {
+    eyebrow: string;
+    heading: string;
+    items: readonly {
+      tag: string;
+      body: string;
+    }[];
+  };
+  services: {
+    eyebrow: string;
+    heading: string;
+    intro: string;
+    items: readonly ServiceContent[];
+  };
+  about: {
+    eyebrow: string;
+    heading: string;
+    intro: string;
+    people: readonly {
+      role: string;
+      name: string;
+      href: string;
+      placeholder: string;
+      bio: string;
+    }[];
+  };
+  contact: {
+    heading: string;
+    intro: string;
+    email: string;
+  };
 };
 
 export type PageContent = {
@@ -79,11 +129,16 @@ const homePageQuery = defineQuery(/* groq */ `
   }
 `);
 
-const homePageFallback = {
-  title: "Hello world",
-  description: "Powered by Sanity.",
-  body: [],
-} satisfies PageContent;
+const servicesQuery = defineQuery(/* groq */ `
+  *[_type == "service" && active != false] | order(order asc, title asc) {
+    _key,
+    title,
+    "slug": slug.current,
+    summary,
+    capabilities,
+    order
+  }
+`);
 
 async function fetchCms<T>(query: string, params: QueryParams = {}) {
   if (!isSanityConfigured) return null;
@@ -104,7 +159,36 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   return settings ?? site;
 }
 
-export async function getHomePage(): Promise<PageContent> {
+export async function getHomePage(): Promise<HomePageContent> {
   const page = await fetchCms<PageContent>(homePageQuery);
-  return page ?? homePageFallback;
+  const services = await fetchCms<
+    Array<{
+      _key?: string;
+      title: string;
+      slug?: string;
+      summary?: string;
+      capabilities?: string[];
+      order?: number;
+    }>
+  >(servicesQuery);
+
+  return {
+    ...homePageContent,
+    title: page?.title ?? homePageContent.title,
+    description: page?.description ?? homePageContent.description,
+    services: {
+      ...homePageContent.services,
+      items:
+        services && services.length > 0
+          ? services.map((service, index) => ({
+              _key: service._key,
+              num: String(index + 1).padStart(2, "0"),
+              title: service.title,
+              slug: service.slug,
+              summary: service.summary ?? "",
+              capabilities: service.capabilities ?? [],
+            }))
+          : homePageContent.services.items,
+    },
+  };
 }

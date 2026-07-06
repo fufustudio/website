@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
-import { Libre_Baskerville, Manrope, IBM_Plex_Mono } from "next/font/google";
+import { DM_Mono, Instrument_Sans, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { VercelInsights } from "@/components/scripts/vercel-insights";
 import { metadataBase, pageMetadata } from "@/lib/seo";
 
-const baskerville = Libre_Baskerville({
-  variable: "--font-baskerville",
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
   subsets: ["latin"],
-  weight: ["400", "700"],
   style: ["normal", "italic"],
+  weight: "400",
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument-sans",
   subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: ["400", "500", "600"],
 });
 
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
+const dmMono = DM_Mono({
+  variable: "--font-dm-mono",
   subsets: ["latin"],
   weight: ["400", "500"],
 });
@@ -39,7 +39,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${baskerville.variable} ${manrope.variable} ${plexMono.variable} antialiased`}
+      className={`${instrumentSerif.variable} ${instrumentSans.variable} ${dmMono.variable} antialiased`}
     >
       <body>
         {children}

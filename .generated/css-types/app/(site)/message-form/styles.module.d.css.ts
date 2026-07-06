@@ -3,9 +3,10 @@ declare const styles: {
   readonly field: string;
   readonly fields: string;
   readonly form: string;
+  readonly glow: string;
   readonly honeypot: string;
-  readonly row: string;
+  readonly notice: string;
   readonly submit: string;
-  readonly success: string;
+  readonly successPanel: string;
 };
 export = styles;

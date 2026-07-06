@@ -5,7 +5,7 @@ The contact form is a minimal optional provider pattern at
 
 ## Form Behavior
 
-- Validates the visitor email and a single message field.
+- Validates the visitor name, email, and message fields.
 - Includes local honeypot fields.
 - Caps submitted field lengths before calling the provider.
 - Submits through the same-origin `/api/contact` route only when Resend is
@@ -17,6 +17,8 @@ The contact form is a minimal optional provider pattern at
 - Sends from the configured site sender, delivers to the configured intake
   recipient, and sets `replyTo` to the visitor email so inbox replies go back
   to the submitter.
+- Links to `/privacy` near the submit area so visitors can review how inquiry
+  and analytics data are handled before submitting.
 
 Resend requires an API key and a verified sending domain before production
 delivery beyond test-mode limitations.
@@ -39,3 +41,6 @@ Starter events:
 - `inquiry_submitted`
 
 Keep analytics calls near the component that fires them. Rename events intentionally when reporting needs change.
+Do not send email addresses, message contents, names, phone numbers, or other
+contact-form personal information in analytics event names or custom
+properties.

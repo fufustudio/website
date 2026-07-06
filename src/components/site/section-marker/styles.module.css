@@ -1,0 +1,26 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: clamp(1.75rem, 4vw, 2.75rem);
+  color: rgb(18 19 26 / 0.64);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.rule {
+  height: 1px;
+  flex: 1 1 auto;
+  background: var(--color-muted);
+}
+
+.dark {
+  color: rgb(246 244 239 / 0.5);
+}
+
+.dark .rule {
+  background: var(--color-divider-dark);
+}

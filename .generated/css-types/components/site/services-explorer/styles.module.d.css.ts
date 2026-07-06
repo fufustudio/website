@@ -1,0 +1,24 @@
+declare const styles: {
+  readonly active: string;
+  readonly bloom: string;
+  readonly chips: string;
+  readonly desktopPanel: string;
+  readonly detail: string;
+  readonly detailWrap: string;
+  readonly glow: string;
+  readonly glowBlue: string;
+  readonly glowBlueAlt: string;
+  readonly glowClay: string;
+  readonly glowClayAlt: string;
+  readonly glowYellow: string;
+  readonly glowYellowAlt: string;
+  readonly item: string;
+  readonly list: string;
+  readonly mobilePanel: string;
+  readonly num: string;
+  readonly open: string;
+  readonly root: string;
+  readonly summary: string;
+  readonly trigger: string;
+};
+export = styles;

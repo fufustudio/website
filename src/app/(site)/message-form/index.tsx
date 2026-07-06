@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { track } from "@vercel/analytics";
@@ -13,8 +14,9 @@ type CaptureState = {
 };
 
 const fieldLimits = {
+  name: 120,
   email: 254,
-  message: 500,
+  message: 1200,
 };
 
 export function MessageForm() {
@@ -41,15 +43,25 @@ export function MessageForm() {
     const email = String(formData.get("email") ?? "")
       .trim()
       .toLowerCase();
+    const name = String(formData.get("name") ?? "").trim();
     const message = String(formData.get("message") ?? "").trim();
 
     if (
+      name.length > fieldLimits.name ||
       email.length > fieldLimits.email ||
       message.length > fieldLimits.message
     ) {
       setState({
         status: "error",
         message: "Please shorten your message and try again.",
+      });
+      return;
+    }
+
+    if (!name) {
+      setState({
+        status: "error",
+        message: "Please enter your name.",
       });
       return;
     }
@@ -79,7 +91,7 @@ export function MessageForm() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ email, message, source: "home" }),
+        body: JSON.stringify({ name, email, message, source: "home" }),
       });
       const result = await res.json().catch(() => null);
 
@@ -118,15 +130,52 @@ export function MessageForm() {
         />
       </div>
 
-      <div className={styles.row}>
+      {state.status === "success" ? (
+        <div className={styles.successPanel} role="status">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            fill="none"
+            aria-hidden
+          >
+            <circle
+              cx="16"
+              cy="16"
+              r="15"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
+            <path
+              d="m9.5 16.5 4.2 4.2L23 11"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+            />
+          </svg>
+          <p>Message sent. We&apos;ll reply within two business days.</p>
+        </div>
+      ) : (
         <div className={styles.fields}>
+          <FormField
+            id="contact-name"
+            name="name"
+            required
+            label="Name"
+            placeholder="Your name"
+            autoComplete="name"
+            maxLength={fieldLimits.name}
+            className={styles.field}
+            disabled={pending}
+          />
           <FormField
             id="contact-email"
             name="email"
             type="email"
             required
             label="Email"
-            placeholder="Email"
+            placeholder="Your email address"
             autoComplete="email"
             inputMode="email"
             maxLength={fieldLimits.email}
@@ -137,31 +186,32 @@ export function MessageForm() {
             id="contact-message"
             name="message"
             required
+            multiline
             label="Message"
-            placeholder="Message"
+            placeholder="Tell us about your project - timeline, scope, a link to what you have..."
             maxLength={fieldLimits.message}
             className={styles.field}
             disabled={pending}
           />
+          <button
+            type="submit"
+            disabled={pending}
+            className={buttonClasses("secondary", styles.submit, "sm")}
+          >
+            {pending ? "Sending..." : "Send it"}
+          </button>
         </div>
-        <button
-          type="submit"
-          disabled={pending}
-          className={buttonClasses("primary", styles.submit)}
-        >
-          {pending ? "Sending..." : "Send"}
-        </button>
-      </div>
-
-      {state.status === "success" ? (
-        <p className={styles.success} role="status">
-          Message sent.
-        </p>
-      ) : null}
+      )}
 
       {state.status === "error" ? (
         <p className={styles.error}>{state.message}</p>
       ) : null}
+
+      <p className={styles.notice}>
+        By submitting this form, you agree that we may use your information to
+        respond to your inquiry. See our{" "}
+        <Link href="/privacy">Privacy Policy</Link>.
+      </p>
     </form>
   );
 }

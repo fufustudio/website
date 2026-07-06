@@ -1,13 +1,22 @@
 declare const styles: {
-  readonly body: string;
-  readonly formWrap: string;
+  readonly contact: string;
+  readonly contactCopy: string;
+  readonly contactGrid: string;
+  readonly contactHeading: string;
+  readonly email: string;
+  readonly ethosGrid: string;
+  readonly ethosItem: string;
   readonly hero: string;
   readonly heroBody: string;
-  readonly heroContent: string;
-  readonly heroGrid: string;
-  readonly heroHeading: string;
+  readonly heroCta: string;
+  readonly heroInner: string;
+  readonly italic: string;
+  readonly kicker: string;
   readonly main: string;
-  readonly sectionGrid: string;
+  readonly section: string;
+  readonly sectionHeading: string;
+  readonly sectionIntro: string;
   readonly shell: string;
+  readonly teamGrid: string;
 };
 export = styles;

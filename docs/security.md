@@ -53,7 +53,9 @@ Before launch:
 ## Privacy Policy Requirement
 
 Add a public privacy policy before launching a real client site with the contact
-form or analytics enabled. The policy should explain, in plain language:
+form or analytics enabled. This launch provides `/privacy` as the baseline
+policy route. Keep it accurate when providers or data flows change. The policy
+should explain, in plain language:
 
 - What the site collects, such as message text, basic analytics, and hosting
   logs.
@@ -71,9 +73,11 @@ client cannot actually honor operationally.
 ## Cookie And Consent Note
 
 A cookie banner is not automatically required for every small marketing site.
-This starter uses Vercel Analytics and Speed Insights, which are intended to be
-privacy-preserving and do not rely on third-party advertising cookies. Still,
-analytics should be disclosed in the privacy policy.
+This launch uses Google Analytics 4, Vercel Analytics, and Speed Insights.
+Google Analytics may use cookies or similar technologies, so analytics and
+browser controls must be disclosed in the privacy policy. Vercel Analytics and
+Speed Insights are intended to be privacy-preserving and do not rely on
+third-party advertising cookies.
 
 Revisit cookie consent before launch whenever a project adds:
 

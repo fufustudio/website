@@ -1,8 +1,10 @@
 export function ContactNotificationEmail({
+  name,
   email,
   message,
   source,
 }: {
+  name: string;
   email: string;
   message: string;
   source: string;
@@ -12,6 +14,8 @@ export function ContactNotificationEmail({
       <h1>New website contact</h1>
       <p>A visitor sent a message from the {source} page.</p>
       <dl>
+        <dt>Name</dt>
+        <dd>{name}</dd>
         <dt>Email</dt>
         <dd>{email}</dd>
         <dt>Message</dt>

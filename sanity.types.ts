@@ -62,6 +62,7 @@ export type Service = {
   title: string;
   slug: Slug;
   summary?: string;
+  capabilities?: Array<string>;
   icon?: "circle" | "leaves" | "bud" | "quatrefoil";
   order?: number;
   active?: boolean;
@@ -301,11 +302,24 @@ export type HomePageQueryResult = {
   body: SimplePortableText | null;
 } | null;
 
+// Source: src/lib/cms.ts
+// Variable: servicesQuery
+// Query: *[_type == "service" && active != false] | order(order asc, title asc) {    _key,    title,    "slug": slug.current,    summary,    capabilities,    order  }
+export type ServicesQueryResult = Array<{
+  _key: null;
+  title: string;
+  slug: string;
+  summary: string | null;
+  capabilities: Array<string> | null;
+  order: number | null;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     '\n  *[_type == "siteSettings" && _id == "siteSettings"][0]{\n    name,\n    contactName,\n    email,\n    phone,\n    address,\n    hours,\n    primaryActionLabel,\n    primaryActionUrl,\n    url,\n    tagline,\n    areaServed,\n    sameAs\n  }\n': SiteSettingsQueryResult;
     '\n  *[_type == "page" && slug.current == "home"][0]{\n    title,\n    description,\n    body\n  }\n': HomePageQueryResult;
+    '\n  *[_type == "service" && active != false] | order(order asc, title asc) {\n    _key,\n    title,\n    "slug": slug.current,\n    summary,\n    capabilities,\n    order\n  }\n': ServicesQueryResult;
   }
 }

@@ -65,6 +65,8 @@ export function Header({
   };
   const closeMobileMenu = () => setMenuOpen(false);
 
+  if (!hasNavItems) return null;
+
   return (
     <header className={classNames(styles.root, styles.solidOverlay)}>
       <Container size="xl" className={styles.inner}>
@@ -72,44 +74,40 @@ export function Header({
           {siteSettings?.name ?? "Fufu"}
         </Link>
 
-        {hasNavItems ? (
-          <nav aria-label="Primary navigation" className={styles.desktopNav}>
-            {navItems.map((item) => {
-              const href = hrefPathname(item.href);
-              const active = isActivePath(normalizedPathname, href);
+        <nav aria-label="Primary navigation" className={styles.desktopNav}>
+          {navItems.map((item) => {
+            const href = hrefPathname(item.href);
+            const active = isActivePath(normalizedPathname, href);
 
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href as LinkProps<string>["href"]}
-                  aria-current={active ? "page" : undefined}
-                  className={classNames(
-                    styles.desktopLink,
-                    active && styles.activeLink,
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        ) : null}
+            return (
+              <Link
+                key={item.label}
+                href={item.href as LinkProps<string>["href"]}
+                aria-current={active ? "page" : undefined}
+                className={classNames(
+                  styles.desktopLink,
+                  active && styles.activeLink,
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
 
-        {hasNavItems ? (
-          <button
-            type="button"
-            aria-label={menuVisible ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-navigation"
-            className={styles.menuButton}
-            onClick={menuVisible ? closeMobileMenu : openMobileMenu}
-          >
-            {menuVisible ? "Close" : "Menu"}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          aria-label={menuVisible ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-navigation"
+          className={styles.menuButton}
+          onClick={menuVisible ? closeMobileMenu : openMobileMenu}
+        >
+          {menuVisible ? "Close" : "Menu"}
+        </button>
       </Container>
 
-      {hasNavItems && menuVisible ? (
+      {menuVisible ? (
         <div
           id="mobile-navigation"
           className={classNames(

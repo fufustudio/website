@@ -14,16 +14,10 @@ export function Footer({
 }) {
   return (
     <footer className={styles.root}>
-      <Container size="xl" className={styles.grid}>
-        <div className={styles.brand}>
-          <Link href="/" className={styles.wordmark}>
-            {siteSettings?.name ?? "Fufu"}
-          </Link>
-          {siteSettings?.tagline ? (
-            <p className={styles.tagline}>{siteSettings.tagline}</p>
-          ) : null}
+      <Container size="xl" className={styles.inner}>
+        <div className={styles.info}>
+          © {new Date().getFullYear()} {siteSettings?.name ?? "Fufu Studio"}
         </div>
-
         {footerNavItems.length > 0 ? (
           <nav aria-label="Footer navigation" className={styles.links}>
             {footerNavItems.map((item) => (
@@ -37,10 +31,6 @@ export function Footer({
             ))}
           </nav>
         ) : null}
-
-        <div className={styles.info}>
-          © {new Date().getFullYear()} {siteSettings?.name ?? "Fufu"}
-        </div>
       </Container>
     </footer>
   );
