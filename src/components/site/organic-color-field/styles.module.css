@@ -5,7 +5,7 @@
   z-index: 0;
   height: 82%;
   contain: layout;
-  overflow: visible;
+  overflow: hidden;
   pointer-events: none;
 }
 
@@ -14,31 +14,10 @@
   height: 92%;
 }
 
-.blob {
-  position: absolute;
-  width: 58%;
-  height: 96%;
-  border-radius: 999px;
-  background: radial-gradient(closest-side, var(--blob-color), transparent 74%);
-  filter: blur(10px);
-  opacity: 0.86;
-  will-change: transform, opacity;
-}
-
-.blobClay {
-  left: 2%;
-  bottom: -6%;
-}
-
-.blobYellow {
-  left: 26%;
-  bottom: -14%;
-  height: 108%;
-}
-
-.blobBlue {
-  right: 0;
-  bottom: -6%;
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 @media (max-width: 639px) {
@@ -50,29 +29,5 @@
   .dark {
     bottom: -18%;
     height: 70%;
-  }
-
-  .blob {
-    width: 84%;
-    height: 92%;
-    filter: blur(14px);
-  }
-
-  .blobClay {
-    left: -28%;
-  }
-
-  .blobYellow {
-    left: 10%;
-  }
-
-  .blobBlue {
-    right: -28%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .blob {
-    transform: none !important;
   }
 }

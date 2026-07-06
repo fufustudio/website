@@ -6,24 +6,24 @@
 
 ## Inventory
 
-| Area    | Item                     | Source                    | Status   | Notes                                              |
-| ------- | ------------------------ | ------------------------- | -------- | -------------------------------------------------- |
-| Route   | `/` one-page site        | Website design            | complete | Hero, ethos, services, about, contact              |
-| Route   | `/privacy`               | Existing local work       | complete | Keep policy and footer link                        |
-| Brand   | Palette and typography   | Design system             | complete | Instrument fonts, paper/midnight/spectrum tokens   |
-| Content | Homepage fallback        | Website design            | complete | Typed local content, Sanity-ready                  |
-| Sanity  | Service capabilities     | Plan                      | complete | Add capability chips to service docs               |
-| Motion  | Organic color fields     | Website design            | complete | RAF spring/repulsion, reduced-motion fallback      |
-| Form    | Contact form             | Existing starter + design | complete | Add name, restyle, keep Resend/honeypots/analytics |
-| QA      | Responsive/accessibility | Runbook                   | complete | Desktop, mobile, reduced motion                    |
+| Area    | Item                     | Source                    | Status   | Notes                                                                   |
+| ------- | ------------------------ | ------------------------- | -------- | ----------------------------------------------------------------------- |
+| Route   | `/` one-page site        | Website design            | complete | Hero, ethos, services, about, contact                                   |
+| Route   | `/privacy`               | Existing local work       | complete | Keep policy and footer link                                             |
+| Brand   | Palette and typography   | Design system             | complete | Instrument fonts, paper/midnight/spectrum tokens                        |
+| Content | Homepage fallback        | Website design            | complete | Typed local content, Sanity-ready                                       |
+| Sanity  | Service capabilities     | Plan                      | complete | Add capability chips to service docs                                    |
+| Motion  | Organic color fields     | Website design            | complete | Canvas soft-body renderer, simplex-noise drift, reduced-motion fallback |
+| Form    | Contact form             | Existing starter + design | complete | Add name, restyle, keep Resend/honeypots/analytics                      |
+| QA      | Responsive/accessibility | Runbook                   | complete | Desktop, mobile, reduced motion                                         |
 
 ## Decisions And Questions
 
-| Type     | Item               | Owner | Status | Resolution                                                 |
-| -------- | ------------------ | ----- | ------ | ---------------------------------------------------------- |
-| Decision | Portrait assets    | User  | closed | Use placeholders; WebP files are spectrum references       |
-| Decision | Motion library     | Codex | closed | Custom RAF/spring logic; no new dependency                 |
-| Decision | Homepage CMS model | Codex | closed | Typed local fallback plus Sanity services; no page builder |
+| Type     | Item               | Owner | Status | Resolution                                                              |
+| -------- | ------------------ | ----- | ------ | ----------------------------------------------------------------------- |
+| Decision | Portrait assets    | User  | closed | Use placeholders; WebP files are spectrum references                    |
+| Decision | Motion approach    | Codex | closed | Canvas 2D soft-body blobs with `simplex-noise`; no PixiJS/Matter/Motion |
+| Decision | Homepage CMS model | Codex | closed | Typed local fallback plus Sanity services; no page builder              |
 
 ## QA And Verification
 
