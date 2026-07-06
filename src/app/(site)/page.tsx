@@ -94,7 +94,7 @@ export default async function Home() {
         size="spacious"
         className={styles.contact}
       >
-        <OrganicColorField tone="dark" />
+        <OrganicColorField tone="dark" variant="footer" />
         <Container size="xl" className={styles.contactGrid}>
           <div className={styles.contactCopy}>
             <h2 className={styles.contactHeading}>

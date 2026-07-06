@@ -1,10 +1,14 @@
 import { createNoise3D } from "simplex-noise";
 
 export type OrganicTone = "light" | "dark";
+export type OrganicFieldVariant = "hero" | "footer";
 
 export type OrganicPointer = {
   x: number;
   y: number;
+  vx: number;
+  vy: number;
+  speed: number;
   active: boolean;
 };
 
@@ -12,6 +16,7 @@ export type OrganicSimulationOptions = {
   width: number;
   height: number;
   tone: OrganicTone;
+  variant?: OrganicFieldVariant;
   seed?: string;
   reducedMotion?: boolean;
 };
@@ -33,7 +38,22 @@ type BlobConfig = {
   ryRatio: number;
   phase: number;
   mass: number;
-  reach: number;
+  swirl: number;
+  drift: number;
+};
+
+type BlobColorConfig = {
+  color: string;
+  opacity: number;
+};
+
+type BlobMotionConfig = {
+  xRatio: number;
+  yRatio: number;
+  rxRatio: number;
+  ryRatio: number;
+  phase: number;
+  mass: number;
   swirl: number;
   drift: number;
 };
@@ -74,87 +94,100 @@ export type OrganicSnapshot = {
 
 const nodeCount = 18;
 
-const presets: Record<OrganicTone, BlobConfig[]> = {
+const toneColors: Record<OrganicTone, BlobColorConfig[]> = {
   light: [
     {
       color: "rgba(222, 173, 137, 0.62)",
-      opacity: 0.88,
-      xRatio: 0.22,
-      yRatio: 0.6,
-      rxRatio: 0.32,
-      ryRatio: 0.38,
-      phase: 0.2,
-      mass: 0.9,
-      reach: 1.08,
-      swirl: -1,
-      drift: 0.042,
+      opacity: 0.72,
     },
     {
       color: "rgba(250, 217, 157, 0.66)",
-      opacity: 0.9,
-      xRatio: 0.52,
-      yRatio: 0.5,
-      rxRatio: 0.3,
-      ryRatio: 0.42,
-      phase: 2.1,
-      mass: 1.1,
-      reach: 1.22,
-      swirl: 1,
-      drift: 0.05,
+      opacity: 0.74,
     },
     {
       color: "rgba(140, 172, 191, 0.6)",
-      opacity: 0.86,
-      xRatio: 0.8,
-      yRatio: 0.6,
-      rxRatio: 0.3,
-      ryRatio: 0.38,
-      phase: 4,
-      mass: 1,
-      reach: 0.98,
-      swirl: -0.72,
-      drift: 0.044,
+      opacity: 0.7,
     },
   ],
   dark: [
     {
       color: "rgba(74, 49, 29, 0.58)",
-      opacity: 0.74,
-      xRatio: 0.24,
-      yRatio: 0.58,
-      rxRatio: 0.32,
-      ryRatio: 0.38,
-      phase: 0.6,
-      mass: 1,
-      reach: 0.9,
-      swirl: -0.74,
-      drift: 0.034,
+      opacity: 0.62,
     },
     {
       color: "rgba(69, 55, 28, 0.5)",
-      opacity: 0.68,
-      xRatio: 0.54,
-      yRatio: 0.52,
-      rxRatio: 0.3,
-      ryRatio: 0.4,
-      phase: 2.5,
-      mass: 1.2,
-      reach: 1,
-      swirl: 0.82,
-      drift: 0.038,
+      opacity: 0.56,
     },
     {
       color: "rgba(30, 50, 66, 0.66)",
-      opacity: 0.74,
-      xRatio: 0.8,
-      yRatio: 0.6,
-      rxRatio: 0.3,
-      ryRatio: 0.38,
-      phase: 4.4,
-      mass: 1.08,
-      reach: 0.88,
-      swirl: -0.62,
-      drift: 0.034,
+      opacity: 0.62,
+    },
+  ],
+};
+
+const variantMotion: Record<OrganicFieldVariant, BlobMotionConfig[]> = {
+  hero: [
+    {
+      xRatio: 0.24,
+      yRatio: 0.68,
+      rxRatio: 0.25,
+      ryRatio: 0.25,
+      phase: 0.2,
+      mass: 0.9,
+      swirl: -1,
+      drift: 0.042,
+    },
+    {
+      xRatio: 0.48,
+      yRatio: 0.64,
+      rxRatio: 0.24,
+      ryRatio: 0.24,
+      phase: 2.1,
+      mass: 1.1,
+      swirl: 1,
+      drift: 0.05,
+    },
+    {
+      xRatio: 0.76,
+      yRatio: 0.66,
+      rxRatio: 0.24,
+      ryRatio: 0.24,
+      phase: 4,
+      mass: 1,
+      swirl: -0.72,
+      drift: 0.044,
+    },
+  ],
+  footer: [
+    {
+      xRatio: 0.24,
+      yRatio: 0.66,
+      rxRatio: 0.25,
+      ryRatio: 0.25,
+      phase: 0.2,
+      mass: 0.9,
+      swirl: -1,
+      drift: 0.042,
+    },
+    {
+      xRatio: 0.5,
+      yRatio: 0.62,
+      rxRatio: 0.24,
+      ryRatio: 0.24,
+      phase: 2.1,
+      mass: 1.1,
+      swirl: 1,
+      drift: 0.05,
+    },
+    {
+      xRatio: 0.76,
+      yRatio: 0.66,
+      rxRatio: 0.24,
+      ryRatio: 0.24,
+      phase: 4,
+      mass: 1,
+      swirl: -0.72,
+      drift: 0.044,
     },
   ],
 };
@@ -163,14 +196,24 @@ export function createOrganicSimulation({
   width,
   height,
   tone,
+  variant = "hero",
   seed = "fufu-organic-field",
   reducedMotion = false,
 }: OrganicSimulationOptions): OrganicSimulation {
   const safeWidth = Math.max(width, 1);
   const safeHeight = Math.max(height, 1);
-  const noise = createNoise3D(seededRandom(`${seed}:${tone}`));
-  const blobs = presets[tone].map((config) =>
-    createBlob(config, safeWidth, safeHeight),
+  const noise = createNoise3D(seededRandom(`${seed}:${tone}:${variant}`));
+  const colors = toneColors[tone];
+  const fallbackColor = colors[0] ?? {
+    color: "rgba(0, 0, 0, 0.5)",
+    opacity: 0.5,
+  };
+  const blobs = variantMotion[variant].map((motion, index) =>
+    createBlob(
+      { ...motion, ...(colors[index] ?? fallbackColor) },
+      safeWidth,
+      safeHeight,
+    ),
   );
   const simulation = {
     width: safeWidth,
@@ -239,14 +282,14 @@ export function stepOrganicSimulation(
     applyPointerForce(simulation, blob, pointer, dt);
     applyBlobSeparation(simulation, blob, dt);
 
-    blob.vx *= 0.958;
-    blob.vy *= 0.958;
-    blob.vx = clamp(blob.vx, -9, 9);
-    blob.vy = clamp(blob.vy, -9, 9);
+    blob.vx *= 0.972;
+    blob.vy *= 0.972;
+    blob.vx = clamp(blob.vx, -15, 15);
+    blob.vy = clamp(blob.vy, -15, 15);
     blob.x += blob.vx * dt;
     blob.y += blob.vy * dt;
 
-    stepNodes(simulation, blob, pointer, dt);
+    stepNodes(simulation, blob, dt);
     containBlob(simulation, blob);
   }
 }
@@ -302,6 +345,34 @@ export function renderOrganicSimulation({
 
   context.clearRect(0, 0, simulation.width, simulation.height);
   context.drawImage(scratch, 0, 0, simulation.width, simulation.height);
+  fadeCanvasBottomEdge(context, simulation);
+}
+
+function fadeCanvasBottomEdge(
+  context: CanvasRenderingContext2D,
+  simulation: OrganicSimulation,
+) {
+  const fadeHeight = Math.min(48, Math.max(18, simulation.height * 0.045));
+  const gradient = context.createLinearGradient(
+    0,
+    simulation.height - fadeHeight,
+    0,
+    simulation.height,
+  );
+
+  gradient.addColorStop(0, "rgb(0 0 0 / 0)");
+  gradient.addColorStop(1, "rgb(0 0 0 / 1)");
+
+  context.save();
+  context.globalCompositeOperation = "destination-out";
+  context.fillStyle = gradient;
+  context.fillRect(
+    0,
+    simulation.height - fadeHeight,
+    simulation.width,
+    fadeHeight,
+  );
+  context.restore();
 }
 
 function createBlob(
@@ -340,7 +411,6 @@ function createBlob(
 function stepNodes(
   simulation: OrganicSimulation,
   blob: OrganicBlob,
-  pointer: OrganicPointer,
   dt: number,
 ) {
   const rotation =
@@ -361,20 +431,6 @@ function stepNodes(
 
     node.vx += (targetX - node.x) * 0.035 * dt;
     node.vy += (targetY - node.y) * 0.035 * dt;
-
-    if (pointer.active) {
-      const dx = node.x - pointer.x;
-      const dy = node.y - pointer.y;
-      const dist = Math.hypot(dx, dy);
-      const reach =
-        Math.max(260, Math.min(520, simulation.width * 0.44)) * blob.reach;
-
-      if (dist > 0.01 && dist < reach) {
-        const force = (1 - dist / reach) ** 2;
-        node.vx += (dx / dist) * force * 1.6 * dt;
-        node.vy += (dy / dist) * force * 1.6 * dt;
-      }
-    }
 
     node.vx *= 0.86;
     node.vy *= 0.86;
@@ -433,17 +489,30 @@ function applyPointerForce(
   const dx = blob.x - pointer.x;
   const dy = blob.y - pointer.y;
   const dist = Math.hypot(dx, dy);
-  const reach =
-    Math.max(300, Math.min(560, simulation.width * 0.5)) * blob.reach;
+  const reach = Math.max(blob.rx, blob.ry);
 
   if (dist <= 0.01 || dist >= reach) return;
 
   const force = (1 - dist / reach) ** 2;
-  const repel = force * (3.25 / blob.mass) * dt;
-  const tangent = force * (1.75 / blob.mass) * blob.swirl * dt;
+  const speed = Math.min(pointer.speed, 52);
 
-  blob.vx += (dx / dist) * repel + (-dy / dist) * tangent;
-  blob.vy += (dy / dist) * repel + (dx / dist) * tangent;
+  if (speed < 0.2) return;
+
+  const pointerDirX = pointer.vx / speed;
+  const pointerDirY = pointer.vy / speed;
+  const awayX = dx / dist;
+  const awayY = dy / dist;
+  const approach = clamp(pointerDirX * awayX + pointerDirY * awayY, 0, 1);
+  const pushX = pointerDirX * 0.72 + awayX * 0.28;
+  const pushY = pointerDirY * 0.72 + awayY * 0.28;
+  const pushLength = Math.hypot(pushX, pushY) || 1;
+  const speedScale = Math.min(speed / 12, 3);
+  const impulse =
+    force * (0.35 + approach * 0.9) * speedScale * (10.5 / blob.mass) * dt;
+  const tangent = force * approach * speedScale * 0.85 * blob.swirl * dt;
+
+  blob.vx += (pushX / pushLength) * impulse + -awayY * tangent;
+  blob.vy += (pushY / pushLength) * impulse + awayX * tangent;
 }
 
 function applyBlobSeparation(
@@ -528,12 +597,13 @@ function drawBlob(
     Math.max(blob.rx, blob.ry) * 1.18,
   );
   gradient.addColorStop(0, blob.color);
-  gradient.addColorStop(0.62, blob.color);
+  gradient.addColorStop(0.38, blob.color);
+  gradient.addColorStop(0.72, softenColor(blob.color, 0.34));
   gradient.addColorStop(1, transparentColor(blob.color));
 
   context.save();
   context.globalAlpha = blob.opacity;
-  context.filter = `blur(${simulation.width < 640 ? 18 : 14}px)`;
+  context.filter = `blur(${simulation.width < 640 ? 31 : 26}px)`;
   context.fillStyle = gradient;
   drawSmoothPath(context, blob.nodes);
   context.fill();
@@ -603,6 +673,13 @@ function transparentColor(color: string) {
   return color.replace(
     /rgba\(([^,]+),\s*([^,]+),\s*([^,]+),\s*[^)]+\)/,
     "rgba($1, $2, $3, 0)",
+  );
+}
+
+function softenColor(color: string, alpha: number) {
+  return color.replace(
+    /rgba\(([^,]+),\s*([^,]+),\s*([^,]+),\s*[^)]+\)/,
+    `rgba($1, $2, $3, ${alpha})`,
   );
 }
 
