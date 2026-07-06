@@ -9,7 +9,7 @@
 | Area    | Item                     | Source                    | Status   | Notes                                                                   |
 | ------- | ------------------------ | ------------------------- | -------- | ----------------------------------------------------------------------- |
 | Route   | `/` one-page site        | Website design            | complete | Hero, ethos, services, about, contact                                   |
-| Route   | `/privacy`               | Existing local work       | complete | Keep policy and footer link                                             |
+| Route   | `/privacy`               | Existing local work       | complete | Keep policy route; no footer link in design                             |
 | Brand   | Palette and typography   | Design system             | complete | Instrument fonts, paper/midnight/spectrum tokens                        |
 | Content | Homepage fallback        | Website design            | complete | Typed local content, Sanity-ready                                       |
 | Sanity  | Service capabilities     | Plan                      | complete | Add capability chips to service docs                                    |

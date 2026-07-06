@@ -50,6 +50,7 @@
   margin: 0;
   font-size: clamp(1.875rem, 5.2vw, 4rem);
   line-height: 1.08;
+  letter-spacing: -0.01em;
 }
 
 .italic {
@@ -125,6 +126,7 @@
   color: var(--color-light);
   font-size: clamp(2.75rem, 8vw, 6.875rem);
   line-height: 0.92;
+  letter-spacing: -0.01em;
 }
 
 .contactCopy p {

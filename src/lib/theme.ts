@@ -9,7 +9,7 @@ export const theme = {
   body: "rgb(18 19 26 / 0.72)",
   surface: "rgb(18 19 26 / 0.05)",
   muted: "rgb(18 19 26 / 0.14)",
-  accent: "#375d6c",
+  accent: "#8cacbf",
   accentSoft: "#fad99d",
   feature: "#dead89",
   light: "#f6f4ef",

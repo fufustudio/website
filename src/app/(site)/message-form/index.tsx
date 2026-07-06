@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { track } from "@vercel/analytics";
@@ -131,7 +130,11 @@ export function MessageForm() {
       </div>
 
       {state.status === "success" ? (
-        <div className={styles.successPanel} role="status">
+        <div
+          className={styles.successPanel}
+          role="status"
+          aria-label="Message sent. We'll reply within two business days."
+        >
           <svg
             width="32"
             height="32"
@@ -154,7 +157,6 @@ export function MessageForm() {
               strokeWidth="2"
             />
           </svg>
-          <p>Message sent. We&apos;ll reply within two business days.</p>
         </div>
       ) : (
         <div className={styles.fields}>
@@ -188,7 +190,7 @@ export function MessageForm() {
             required
             multiline
             label="Message"
-            placeholder="Tell us about your project - timeline, scope, a link to what you have..."
+            placeholder="Tell us about your project — timeline, scope, a link to what you have…"
             maxLength={fieldLimits.message}
             className={styles.field}
             disabled={pending}
@@ -196,9 +198,9 @@ export function MessageForm() {
           <button
             type="submit"
             disabled={pending}
-            className={buttonClasses("secondary", styles.submit, "sm")}
+            className={buttonClasses("secondary", styles.submit, "md")}
           >
-            {pending ? "Sending..." : "Send it"}
+            {pending ? "Sending…" : "Send it"}
           </button>
         </div>
       )}
@@ -206,12 +208,6 @@ export function MessageForm() {
       {state.status === "error" ? (
         <p className={styles.error}>{state.message}</p>
       ) : null}
-
-      <p className={styles.notice}>
-        By submitting this form, you agree that we may use your information to
-        respond to your inquiry. See our{" "}
-        <Link href="/privacy">Privacy Policy</Link>.
-      </p>
     </form>
   );
 }

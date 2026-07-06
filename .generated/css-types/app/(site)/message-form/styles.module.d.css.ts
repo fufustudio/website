@@ -5,7 +5,6 @@ declare const styles: {
   readonly form: string;
   readonly glow: string;
   readonly honeypot: string;
-  readonly notice: string;
   readonly submit: string;
   readonly successPanel: string;
 };

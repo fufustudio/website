@@ -9,7 +9,7 @@ export const homePageContent = {
     href: "#contact",
   },
   ethos: {
-    eyebrow: "01 - Ethos",
+    eyebrow: "01 — Ethos",
     heading: "Look as good online as you feel in real life",
     items: [
       {
@@ -27,10 +27,10 @@ export const homePageContent = {
     ],
   },
   services: {
-    eyebrow: "02 - Services",
+    eyebrow: "02 — Services",
     heading: "Design and development, end-to-end",
     intro:
-      "We help small and medium sized businesses create polished digital experiences - from brand and design to content management systems, integrations, analytics, performance, and custom web applications.",
+      "We help small and medium sized businesses create polished digital experiences — from brand and design to content management systems, integrations, analytics, performance, and custom web applications.",
     items: [
       {
         num: "01",
@@ -113,24 +113,24 @@ export const homePageContent = {
     ],
   },
   about: {
-    eyebrow: "03 - About",
+    eyebrow: "03 — About",
     heading: "Your team of two",
     intro:
-      "You work directly with the two people making your site - a designer and an engineer, with a combined 18 years of experience. No handoffs, no account managers, no drift.",
+      "You work directly with the two people making your site — a designer and an engineer, with a combined 18 years of experience. No handoffs, no account managers, no drift.",
     people: [
       {
         role: "Design",
         name: "Sarah Dempsey",
         href: "https://www.linkedin.com/in/sasdempsey/",
         placeholder: "Designer portrait",
-        bio: "Leads brand, layout, type, and the feel of every interaction - turning your goals into a site that's clear, credible, and specific to you.",
+        bio: "Leads brand, layout, type, and the feel of every interaction — turning your goals into a site that's clear, credible, and specific to you.",
       },
       {
         role: "Engineering",
         name: "Danny Welstad",
         href: "https://www.linkedin.com/in/danny-welstad",
         placeholder: "Engineer portrait",
-        bio: "Leads build, performance, and integrations - making the design hold up in the real world: fast, responsive, and easy to maintain.",
+        bio: "Leads build, performance, and integrations — making the design hold up in the real world: fast, responsive, and easy to maintain.",
       },
     ],
   },

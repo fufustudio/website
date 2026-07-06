@@ -89,7 +89,7 @@
 }
 
 .lightLink {
-  color: rgb(241 238 235 / 0.9);
+  color: rgb(246 244 239 / 0.9);
 }
 
 .lightLink:hover,
@@ -165,11 +165,11 @@
 }
 
 .secondaryLight {
-  border-color: rgb(241 238 235 / 0.3);
+  border-color: rgb(246 244 239 / 0.3);
 }
 
 .secondaryDark {
-  border-color: rgb(58 35 42 / 0.2);
+  border-color: rgb(18 19 26 / 0.2);
 }
 
 .item {
@@ -200,7 +200,7 @@
 }
 
 .primaryLight {
-  color: rgb(241 238 235 / 0.85);
+  color: rgb(246 244 239 / 0.85);
 }
 
 .primaryLight:hover,
@@ -218,7 +218,7 @@
 }
 
 .utilityLight {
-  color: rgb(241 238 235 / 0.75);
+  color: rgb(246 244 239 / 0.75);
 }
 
 .utilityLight:hover,

@@ -53,7 +53,7 @@
   inset: 0;
   z-index: 0;
   background:
-    linear-gradient(rgb(58 35 42 / 0.62), rgb(58 35 42 / 0.62)), var(--color-fg);
+    linear-gradient(rgb(18 19 26 / 0.62), rgb(18 19 26 / 0.62)), var(--color-fg);
 }
 
 .hasBg {

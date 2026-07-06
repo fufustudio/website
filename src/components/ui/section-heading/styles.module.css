@@ -24,12 +24,12 @@
 }
 
 .eyebrow {
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
   line-height: 1.6;
-  color: var(--color-accent);
-  letter-spacing: 0.22em;
+  color: rgb(18 19 26 / 0.5);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 

@@ -12,7 +12,7 @@
   --color-body: rgb(18 19 26 / 0.72);
   --color-surface: rgb(18 19 26 / 0.05);
   --color-muted: rgb(18 19 26 / 0.14);
-  --color-accent: #375d6c;
+  --color-accent: #8cacbf;
   --color-accent-soft: #fad99d;
   --color-feature: #dead89;
   --color-light: #f6f4ef;
@@ -39,9 +39,9 @@
   --font-sans: var(--font-instrument-sans);
   --font-mono: var(--font-dm-mono);
   --radius-btn: 9999px;
-  --radius-card: 8px;
-  --radius-media: 8px;
-  --radius-panel: 8px;
+  --radius-card: 14px;
+  --radius-media: 14px;
+  --radius-panel: 14px;
   --shadow-card: 0 24px 60px rgb(18 19 26 / 0.08);
   --space-section-compact: clamp(3rem, 7vw, 4rem);
   --space-section-default: clamp(4rem, 8vw, 5rem);
@@ -71,12 +71,13 @@
     font-family: var(--font-heading), Georgia, serif;
     font-weight: 400;
     line-height: 1.08;
-    letter-spacing: 0;
+    letter-spacing: -0.01em;
     color: var(--color-fg);
   }
 
   h1 {
     font-size: clamp(2.6rem, 7vw, 66px);
+    letter-spacing: -0.02em;
   }
   h2 {
     font-size: clamp(2rem, 5.5vw, 44px);
@@ -201,12 +202,13 @@
     font-family: var(--font-heading), Georgia, serif;
     font-weight: 400;
     line-height: 1.08;
-    letter-spacing: 0;
+    letter-spacing: -0.01em;
     color: var(--color-fg);
   }
 
   .heading-display {
     font-size: clamp(3.25rem, 10vw, 140px);
+    letter-spacing: -0.02em;
   }
 
   .heading-section {
@@ -223,12 +225,12 @@
 
   /* Small uppercase label above headings */
   .eyebrow {
-    font-family: var(--font-sans), system-ui, sans-serif;
+    font-family: var(--font-mono), ui-monospace, monospace;
     font-weight: 500;
     font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-accent);
+    color: rgb(18 19 26 / 0.5);
   }
 
   /* Mono label for nav, step numbers, footer captions */

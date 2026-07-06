@@ -10,6 +10,4 @@ export const SITE_DEFAULT_DESCRIPTION =
 
 export const MAIN_NAV = [] as const satisfies readonly NavItem[];
 
-export const FOOTER_NAV = [
-  { label: "Privacy", href: "/privacy" },
-] as const satisfies readonly NavItem[];
+export const FOOTER_NAV = [] as const satisfies readonly NavItem[];

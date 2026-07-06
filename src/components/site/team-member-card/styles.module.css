@@ -15,22 +15,17 @@
   gap: 0.35rem;
   width: 100%;
   border: 1px solid rgb(18 19 26 / 0.1);
-  border-radius: 8px;
+  border-radius: var(--radius-media);
   background: rgb(18 19 26 / 0.05);
   color: rgb(18 19 26 / 0.64);
   font-size: 12px;
 }
 
 .placeholderIcon {
-  display: inline-flex;
+  display: block;
   width: 18px;
   height: 18px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid currentColor;
-  border-radius: 4px;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  line-height: 1;
+  flex: 0 0 auto;
 }
 
 .copy {
@@ -53,6 +48,7 @@
   margin: 0;
   font-size: clamp(1.625rem, 3.4vw, 2.625rem);
   line-height: 1.05;
+  letter-spacing: -0.01em;
 }
 
 .name a {

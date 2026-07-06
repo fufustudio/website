@@ -10,15 +10,18 @@ export function ServicesExplorer({
 }: {
   services: readonly ServiceContent[];
 }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const activeService = services[activeIndex] ?? services[0];
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const activeService = activeIndex === null ? null : services[activeIndex];
   const glowClass = useMemo(
-    () => glowClasses[activeIndex % glowClasses.length],
+    () =>
+      activeIndex === null
+        ? null
+        : glowClasses[activeIndex % glowClasses.length],
     [activeIndex],
   );
 
   return (
-    <div className={styles.root}>
+    <div className={styles.root} onMouseLeave={() => setActiveIndex(null)}>
       <div className={styles.list} aria-label="Services">
         {services.map((service, index) => {
           const selected = activeIndex === index;

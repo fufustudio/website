@@ -24,6 +24,7 @@
   font-family: var(--font-heading), Georgia, serif;
   font-size: clamp(1.625rem, 3.4vw, 2.625rem);
   line-height: 1.05;
+  letter-spacing: -0.01em;
   text-align: left;
   transition:
     opacity 300ms ease,
@@ -53,6 +54,7 @@
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 12px;
   font-style: normal;
+  font-weight: 500;
   letter-spacing: 0.12em;
   white-space: nowrap;
   transition: opacity 300ms ease;

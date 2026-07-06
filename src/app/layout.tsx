@@ -14,7 +14,7 @@ const instrumentSerif = Instrument_Serif({
 const instrumentSans = Instrument_Sans({
   variable: "--font-instrument-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: "variable",
 });
 
 const dmMono = DM_Mono({

@@ -16,9 +16,32 @@ export function TeamMemberCard({
   return (
     <article className={styles.card}>
       <div className={styles.portrait} aria-label={placeholder} role="img">
-        <span className={styles.placeholderIcon} aria-hidden>
-          +
-        </span>
+        <svg
+          className={styles.placeholderIcon}
+          width="18"
+          height="18"
+          viewBox="0 0 18 18"
+          fill="none"
+          aria-hidden
+        >
+          <rect
+            x="1.5"
+            y="1.5"
+            width="15"
+            height="15"
+            rx="2.5"
+            stroke="currentColor"
+            strokeWidth="1.2"
+          />
+          <circle cx="7" cy="7" r="1.7" fill="currentColor" opacity="0.62" />
+          <path
+            d="m4 13 3.2-3.4 2.4 2.3 1.7-1.7L14 13"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.2"
+          />
+        </svg>
         <span>{placeholder}</span>
       </div>
       <div className={styles.copy}>

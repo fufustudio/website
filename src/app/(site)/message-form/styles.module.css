@@ -16,7 +16,8 @@
 }
 
 .fields {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.875rem;
 }
 
@@ -80,7 +81,7 @@ textarea.field {
   gap: clamp(1.375rem, 3vw, 1.875rem);
   overflow: hidden;
   border: 1px solid rgb(246 244 239 / 0.2);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: clamp(2.75rem, 6vw, 4.5rem);
   color: var(--color-light);
   text-align: center;
@@ -100,38 +101,18 @@ textarea.field {
   content: "";
 }
 
-.successPanel svg,
-.successPanel p {
+.successPanel svg {
   position: relative;
   z-index: 1;
 }
 
-.successPanel p {
-  max-width: 25ch;
-  margin: 0;
-  color: rgb(246 244 239 / 0.82);
-}
-
-.error,
-.notice {
+.error {
   margin-top: 0.875rem;
   font-size: 0.9rem;
 }
 
 .error {
   color: var(--color-spectrum-yellow);
-}
-
-.notice {
-  max-width: 31rem;
-  color: rgb(246 244 239 / 0.56);
-  line-height: 1.55;
-}
-
-.notice a {
-  color: rgb(246 244 239 / 0.82);
-  text-decoration: underline;
-  text-underline-offset: 0.18em;
 }
 
 @keyframes glow {
