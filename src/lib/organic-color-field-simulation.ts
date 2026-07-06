@@ -63,6 +63,9 @@ export type OrganicBlob = BlobConfig & {
   y: number;
   vx: number;
   vy: number;
+  cursorForceX: number;
+  cursorForceY: number;
+  cursorInfluence: number;
   rx: number;
   ry: number;
   nodes: NodePoint[];
@@ -276,23 +279,32 @@ export function stepOrganicSimulation(
   const dt = Math.min(Math.max(deltaMs / 16.67, 0), 2);
   simulation.time += deltaMs;
 
+  if (dt === 0) return;
+
   for (const blob of simulation.blobs) {
     const flow = sampleFlow(simulation, blob);
     blob.vx += flow.x * blob.drift * dt;
     blob.vy += flow.y * blob.drift * dt;
 
-    applyPointerForce(simulation, blob, pointer, dt);
+    applyPointerRepulsionField(simulation, blob, pointer, dt);
     applyBlobSeparation(simulation, blob, dt);
 
     blob.vx *= 0.972;
     blob.vy *= 0.972;
-    blob.vx = clamp(blob.vx, -15, 15);
-    blob.vy = clamp(blob.vy, -15, 15);
-    blob.x += blob.vx * dt;
-    blob.y += blob.vy * dt;
+    const velocity = clampVector(blob.vx, blob.vy, 5.8);
+    const movement = clampVector(
+      velocity.x * dt,
+      velocity.y * dt,
+      Math.max(3.8, getBlobInteractionRadius(blob) * 0.026),
+    );
+    blob.vx = movement.x / dt;
+    blob.vy = movement.y / dt;
+    blob.x += movement.x;
+    blob.y += movement.y;
 
     stepNodes(simulation, blob, dt);
     containBlob(simulation, blob);
+    enforcePointerExclusion(simulation, blob, pointer);
   }
 }
 
@@ -404,6 +416,9 @@ function createBlob(
     y,
     vx: 0,
     vy: 0,
+    cursorForceX: 0,
+    cursorForceY: 0,
+    cursorInfluence: 0,
     rx,
     ry,
     nodes,
@@ -462,8 +477,9 @@ function stepNodes(
   }
 
   for (const node of blob.nodes) {
-    node.vx = clamp(node.vx, -13, 13);
-    node.vy = clamp(node.vy, -13, 13);
+    const velocity = clampVector(node.vx, node.vy, 5.4);
+    node.vx = velocity.x;
+    node.vy = velocity.y;
     node.x += node.vx * dt;
     node.y += node.vy * dt;
   }
@@ -480,41 +496,215 @@ function stepNodes(
   blob.y = blob.y * 0.94 + (average.y / blob.nodes.length) * 0.06;
 }
 
-function applyPointerForce(
+function applyPointerRepulsionField(
   simulation: OrganicSimulation,
   blob: OrganicBlob,
   pointer: OrganicPointer,
   dt: number,
+) {
+  if (!pointer.active) {
+    decayCursorForce(blob, dt);
+    return;
+  }
+
+  const dx = blob.x - pointer.x;
+  const dy = blob.y - pointer.y;
+  const dist = Math.hypot(dx, dy);
+  const radius = getBlobInteractionRadius(blob);
+  const { field, clearance } = getPointerFieldRadii(radius);
+
+  if (dist >= field) {
+    decayCursorForce(blob, dt);
+    return;
+  }
+
+  const { x: awayX, y: awayY } = getRepulsionDirection(
+    simulation,
+    blob,
+    pointer,
+    dx,
+    dy,
+    dist,
+  );
+  const pressure = getMagneticPressure(dist, field);
+  const overlapPressure = getBlobOverlapPressure(simulation, blob);
+  const clusterDamping = 1 - overlapPressure * 0.55;
+  const impulse =
+    (pressure * 0.32 + pressure ** 2 * 0.34) *
+    clusterDamping *
+    (1 / blob.mass) *
+    dt;
+  const drag =
+    1 - Math.min(pressure * (0.025 + overlapPressure * 0.055), 0.085);
+
+  blob.vx *= drag;
+  blob.vy *= drag;
+  applySmoothedCursorForce(
+    blob,
+    awayX * impulse,
+    awayY * impulse,
+    pressure,
+    dt,
+  );
+  blob.vx += blob.cursorForceX;
+  blob.vy += blob.cursorForceY;
+
+  for (const node of blob.nodes) {
+    const nodeDx = node.x - pointer.x;
+    const nodeDy = node.y - pointer.y;
+    const nodeDist = Math.hypot(nodeDx, nodeDy);
+
+    if (nodeDist >= field || nodeDist <= 0.01) continue;
+
+    const nodePressure = getMagneticPressure(nodeDist, field);
+    const nodeImpulse =
+      nodePressure * clusterDamping * blob.cursorInfluence * 0.1 * dt;
+    node.vx += (nodeDx / nodeDist) * nodeImpulse;
+    node.vy += (nodeDy / nodeDist) * nodeImpulse;
+  }
+
+  relaxBlobOutsidePointer(simulation, blob, clearance, awayX, awayY, dist, dt);
+}
+
+function applySmoothedCursorForce(
+  blob: OrganicBlob,
+  targetX: number,
+  targetY: number,
+  pressure: number,
+  dt: number,
+) {
+  const response = 1 - Math.pow(0.955 - pressure * 0.018, dt);
+  const influenceResponse = 1 - Math.pow(0.94, dt);
+
+  blob.cursorInfluence += (1 - blob.cursorInfluence) * influenceResponse;
+  blob.cursorForceX += (targetX - blob.cursorForceX) * response;
+  blob.cursorForceY += (targetY - blob.cursorForceY) * response;
+}
+
+function decayCursorForce(blob: OrganicBlob, dt: number) {
+  const decay = Math.pow(0.9, dt);
+
+  blob.cursorInfluence *= decay;
+  blob.cursorForceX *= decay;
+  blob.cursorForceY *= decay;
+}
+
+function getBlobInteractionRadius(blob: OrganicBlob) {
+  return Math.max(blob.rx, blob.ry);
+}
+
+function getPointerFieldRadii(radius: number) {
+  return {
+    field: radius * 1.72,
+    clearance: radius * 0.74,
+  };
+}
+
+function getMagneticPressure(distance: number, radius: number) {
+  const proximity = clamp(1 - distance / radius, 0, 1);
+  const eased =
+    proximity * proximity * proximity * (proximity * (proximity * 6 - 15) + 10);
+
+  return eased ** 1.25;
+}
+
+function getRepulsionDirection(
+  simulation: OrganicSimulation,
+  blob: OrganicBlob,
+  pointer: OrganicPointer,
+  dx: number,
+  dy: number,
+  dist: number,
+) {
+  if (dist > 0.01) {
+    return {
+      x: dx / dist,
+      y: dy / dist,
+    };
+  }
+
+  return getMostOpenDirection(simulation, blob);
+}
+
+function getMostOpenDirection(
+  simulation: OrganicSimulation,
+  blob: OrganicBlob,
+) {
+  const options = [
+    { x: -1, y: 0, clearance: blob.x - blob.rx },
+    { x: 1, y: 0, clearance: simulation.width - blob.x - blob.rx },
+    { x: 0, y: -1, clearance: blob.y - blob.ry },
+    { x: 0, y: 1, clearance: simulation.height - blob.y - blob.ry },
+  ].sort((a, b) => b.clearance - a.clearance);
+
+  return {
+    x: options[0]?.x ?? 1,
+    y: options[0]?.y ?? 0,
+  };
+}
+
+function enforcePointerExclusion(
+  simulation: OrganicSimulation,
+  blob: OrganicBlob,
+  pointer: OrganicPointer,
 ) {
   if (!pointer.active) return;
 
   const dx = blob.x - pointer.x;
   const dy = blob.y - pointer.y;
   const dist = Math.hypot(dx, dy);
-  const reach = Math.max(blob.rx, blob.ry);
+  const { clearance } = getPointerFieldRadii(getBlobInteractionRadius(blob));
 
-  if (dist <= 0.01 || dist >= reach) return;
+  if (dist >= clearance) return;
 
-  const force = (1 - dist / reach) ** 2;
-  const speed = Math.min(pointer.speed, 52);
+  const { x: awayX, y: awayY } = getRepulsionDirection(
+    simulation,
+    blob,
+    pointer,
+    dx,
+    dy,
+    dist,
+  );
 
-  if (speed < 0.2) return;
+  relaxBlobOutsidePointer(simulation, blob, clearance, awayX, awayY, dist, 1.2);
+}
 
-  const pointerDirX = pointer.vx / speed;
-  const pointerDirY = pointer.vy / speed;
-  const awayX = dx / dist;
-  const awayY = dy / dist;
-  const approach = clamp(pointerDirX * awayX + pointerDirY * awayY, 0, 1);
-  const pushX = pointerDirX * 0.72 + awayX * 0.28;
-  const pushY = pointerDirY * 0.72 + awayY * 0.28;
-  const pushLength = Math.hypot(pushX, pushY) || 1;
-  const speedScale = Math.min(speed / 12, 3);
-  const impulse =
-    force * (0.35 + approach * 0.9) * speedScale * (10.5 / blob.mass) * dt;
-  const tangent = force * approach * speedScale * 0.85 * blob.swirl * dt;
+function relaxBlobOutsidePointer(
+  simulation: OrganicSimulation,
+  blob: OrganicBlob,
+  clearance: number,
+  awayX: number,
+  awayY: number,
+  dist: number,
+  dt: number,
+) {
+  const penetration = clearance - dist + 0.5;
 
-  blob.vx += (pushX / pushLength) * impulse + -awayY * tangent;
-  blob.vy += (pushY / pushLength) * impulse + awayX * tangent;
+  if (penetration <= 0) return;
+
+  const influence = clamp(blob.cursorInfluence, 0, 1);
+
+  if (dist < 0.01) {
+    const correction = Math.min(
+      penetration,
+      clearance * (0.014 + influence * 0.026),
+    );
+    translateBlob(blob, awayX * correction, awayY * correction);
+    blob.vx += awayX * correction * 0.0035;
+    blob.vy += awayY * correction * 0.0035;
+    containBlob(simulation, blob);
+    return;
+  }
+
+  const pressure = clamp(penetration / clearance, 0, 1);
+  const correction = Math.min(
+    penetration * (0.01 + pressure * 0.022) * (0.35 + influence * 0.65) * dt,
+    clearance * (0.014 + influence * 0.026),
+  );
+  translateBlob(blob, awayX * correction, awayY * correction);
+  blob.vx += awayX * correction * 0.0035;
+  blob.vy += awayY * correction * 0.0035;
+  containBlob(simulation, blob);
 }
 
 function applyBlobSeparation(
@@ -528,14 +718,59 @@ function applyBlobSeparation(
     const dx = blob.x - other.x;
     const dy = blob.y - other.y;
     const dist = Math.hypot(dx, dy);
-    const separation = Math.min(blob.rx + other.rx, blob.ry + other.ry) * 0.62;
+    const separation =
+      Math.max(blob.rx, blob.ry) * 0.9 + Math.max(other.rx, other.ry) * 0.9;
 
     if (dist > 0.01 && dist < separation) {
-      const force = (1 - dist / separation) * 0.58 * dt;
-      blob.vx += (dx / dist) * force;
-      blob.vy += (dy / dist) * force;
+      const pressure = getMagneticPressure(dist, separation);
+      const drag = 1 - Math.min(pressure * 0.065, 0.095);
+      const force = (pressure * 0.54 + pressure ** 2 * 0.48) * dt;
+      const awayX = dx / dist;
+      const awayY = dy / dist;
+
+      blob.vx *= drag;
+      blob.vy *= drag;
+      blob.vx += awayX * force;
+      blob.vy += awayY * force;
+
+      for (const node of blob.nodes) {
+        const nodeDx = node.x - other.x;
+        const nodeDy = node.y - other.y;
+        const nodeDist = Math.hypot(nodeDx, nodeDy);
+
+        if (nodeDist <= 0.01 || nodeDist >= separation) continue;
+
+        const nodePressure = getMagneticPressure(nodeDist, separation);
+        const nodeForce = nodePressure * 0.28 * dt;
+        node.vx += (nodeDx / nodeDist) * nodeForce;
+        node.vy += (nodeDy / nodeDist) * nodeForce;
+      }
     }
   }
+}
+
+function getBlobOverlapPressure(
+  simulation: OrganicSimulation,
+  blob: OrganicBlob,
+) {
+  let pressure = 0;
+
+  for (const other of simulation.blobs) {
+    if (other === blob) continue;
+
+    const dx = blob.x - other.x;
+    const dy = blob.y - other.y;
+    const dist = Math.hypot(dx, dy);
+    const radius = getBlobInteractionRadius(blob);
+    const otherRadius = getBlobInteractionRadius(other);
+    const overlapDistance = (radius + otherRadius) * 0.82;
+
+    if (dist <= 0.01 || dist >= overlapDistance) continue;
+
+    pressure = Math.max(pressure, getMagneticPressure(dist, overlapDistance));
+  }
+
+  return clamp(pressure, 0, 1);
 }
 
 function sampleFlow(simulation: OrganicSimulation, blob: OrganicBlob) {
@@ -581,6 +816,16 @@ function containBlob(simulation: OrganicSimulation, blob: OrganicBlob) {
       node.vy =
         shiftY > 0 ? Math.abs(node.vy) * 0.42 : -Math.abs(node.vy) * 0.42;
     }
+  }
+}
+
+function translateBlob(blob: OrganicBlob, x: number, y: number) {
+  blob.x += x;
+  blob.y += y;
+
+  for (const node of blob.nodes) {
+    node.x += x;
+    node.y += y;
   }
 }
 
@@ -695,6 +940,21 @@ function softenColor(color: string, alpha: number) {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+function clampVector(x: number, y: number, maxLength: number) {
+  const length = Math.hypot(x, y);
+
+  if (length <= maxLength || length <= 0.01) {
+    return { x, y };
+  }
+
+  const scale = maxLength / length;
+
+  return {
+    x: x * scale,
+    y: y * scale,
+  };
 }
 
 function seededRandom(seed: string) {

@@ -7,8 +7,8 @@
 
 .portrait {
   display: flex;
-  aspect-ratio: 1 / 0.72;
-  min-height: 300px;
+  aspect-ratio: 4 / 3;
+  min-height: clamp(200px, 62vw, 260px);
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -52,6 +52,9 @@
 }
 
 .name a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   color: inherit;
   text-decoration: none;
 }
@@ -70,6 +73,7 @@
 
 @media (min-width: 768px) {
   .portrait {
+    aspect-ratio: 1 / 0.72;
     min-height: clamp(340px, 34vw, 470px);
   }
 }

@@ -138,6 +138,9 @@
 }
 
 .email {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   margin-top: -0.875rem;
   color: rgb(246 244 239 / 0.72);
   font-family: var(--font-mono), ui-monospace, monospace;
@@ -159,6 +162,26 @@
 
   .teamGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .section + .section {
+    padding-block-start: 0;
+  }
+
+  .hero {
+    min-height: auto;
+    padding-block: clamp(6.75rem, 24vw, 7.75rem) clamp(3.75rem, 16vw, 4.75rem);
+  }
+
+  .heroBody {
+    margin-top: 1rem;
+    font-size: 1rem;
+  }
+
+  .heroCta {
+    margin-top: 1.5rem;
   }
 }
 

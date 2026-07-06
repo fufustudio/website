@@ -36,6 +36,7 @@ export function OrganicColorField({
     if (!root || !canvas || !context) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
     const scratch = document.createElement("canvas");
     const pointer: OrganicPointer = {
       x: 0,
@@ -140,6 +141,8 @@ export function OrganicColorField({
       hasPointer = false;
     };
 
+    const shouldTrackPointer = finePointer.matches;
+
     const resizeObserver = new ResizeObserver(measure);
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       visible = Boolean(entry?.isIntersecting);
@@ -148,9 +151,11 @@ export function OrganicColorField({
     measure();
     resizeObserver.observe(root);
     intersectionObserver.observe(root);
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    window.addEventListener("pointerleave", onPointerLeave);
-    window.addEventListener("blur", onPointerLeave);
+    if (shouldTrackPointer) {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("pointerleave", onPointerLeave);
+      window.addEventListener("blur", onPointerLeave);
+    }
 
     if (!reducedMotion.matches) {
       raf = window.requestAnimationFrame(tick);
@@ -159,9 +164,11 @@ export function OrganicColorField({
     return () => {
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerleave", onPointerLeave);
-      window.removeEventListener("blur", onPointerLeave);
+      if (shouldTrackPointer) {
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerleave", onPointerLeave);
+        window.removeEventListener("blur", onPointerLeave);
+      }
       window.cancelAnimationFrame(raf);
     };
   }, [tone, variant]);

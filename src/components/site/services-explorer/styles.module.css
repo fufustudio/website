@@ -9,14 +9,16 @@
 }
 
 .item {
-  border-bottom: 1px solid transparent;
+  border-bottom: 1px solid rgb(18 19 26 / 0.12);
 }
 
 .trigger {
   display: flex;
   width: 100%;
-  align-items: baseline;
-  padding: clamp(0.45rem, 1vw, 0.75rem) 0;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.75rem 0;
   border: 0;
   background: transparent;
   color: var(--color-fg);
@@ -29,6 +31,33 @@
   transition:
     opacity 300ms ease,
     transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.title {
+  min-width: 0;
+}
+
+.indicator {
+  display: inline-flex;
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  border: 1px solid rgb(18 19 26 / 0.18);
+  border-radius: 999px;
+  color: rgb(18 19 26 / 0.64);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.indicator svg {
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 1.75;
 }
 
 .list:hover .trigger {
@@ -66,6 +95,12 @@
   opacity: 0;
 }
 
+.active .indicator {
+  border-color: var(--color-fg);
+  background: var(--color-fg);
+  color: var(--color-bg);
+}
+
 .mobilePanel {
   display: grid;
   grid-template-rows: 0fr;
@@ -75,7 +110,8 @@
     opacity 220ms ease;
 }
 
-.mobilePanel > * {
+.mobilePanelInner {
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -201,10 +237,46 @@
   letter-spacing: 0.02em;
 }
 
+@media (max-width: 767px) {
+  .list:hover .trigger {
+    opacity: 1;
+  }
+
+  .list:hover .trigger:hover,
+  .trigger:focus-visible,
+  .active {
+    transform: none;
+  }
+
+  .trigger:hover .num,
+  .trigger:focus-visible .num,
+  .active .num {
+    opacity: 1;
+  }
+
+  .detail {
+    padding: 0.125rem 0 1.25rem calc(clamp(1.4rem, 2.4vw, 2rem) + 0.75rem);
+  }
+}
+
 @media (min-width: 768px) {
   .root {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
+  }
+
+  .item {
+    border-bottom-color: transparent;
+  }
+
+  .trigger {
+    align-items: baseline;
+    min-height: 0;
+    padding: clamp(0.45rem, 1vw, 0.75rem) 0;
+  }
+
+  .indicator {
+    display: none;
   }
 
   .mobilePanel {

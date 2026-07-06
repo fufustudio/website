@@ -1,5 +1,6 @@
 "use client";
 
+import { Minus, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { ServiceContent } from "@/lib/cms";
 import { cn } from "@/lib/cn";
@@ -21,31 +22,48 @@ export function ServicesExplorer({
   );
 
   return (
-    <div className={styles.root} onMouseLeave={() => setActiveIndex(null)}>
+    <div
+      className={styles.root}
+      onMouseLeave={() => {
+        if (hasFinePointer()) setActiveIndex(null);
+      }}
+    >
       <div className={styles.list} aria-label="Services">
         {services.map((service, index) => {
           const selected = activeIndex === index;
           const panelId = `service-panel-${service.num}`;
+          const triggerId = `service-trigger-${service.num}`;
+          const IndicatorIcon = selected ? Minus : Plus;
 
           return (
             <div key={service._key ?? service.title} className={styles.item}>
               <button
+                id={triggerId}
                 type="button"
                 aria-expanded={selected}
                 aria-controls={panelId}
                 className={cn(styles.trigger, selected && styles.active)}
-                onMouseEnter={() => setActiveIndex(index)}
-                onFocus={() => setActiveIndex(index)}
-                onClick={() => setActiveIndex(index)}
+                onMouseEnter={() => {
+                  if (hasFinePointer()) setActiveIndex(index);
+                }}
+                onClick={() => setActiveIndex(selected ? null : index)}
               >
                 <span className={styles.num}>{service.num}</span>
-                <span>{service.title}</span>
+                <span className={styles.title}>{service.title}</span>
+                <span className={styles.indicator} aria-hidden="true">
+                  <IndicatorIcon />
+                </span>
               </button>
               <div
                 id={panelId}
+                role="region"
+                aria-labelledby={triggerId}
+                aria-hidden={!selected}
                 className={cn(styles.mobilePanel, selected && styles.open)}
               >
-                <ServiceDetail service={service} />
+                <div className={styles.mobilePanelInner}>
+                  <ServiceDetail service={service} />
+                </div>
               </div>
             </div>
           );
@@ -90,3 +108,7 @@ const glowClasses = [
   styles.glowBlueAlt,
   styles.glowYellowAlt,
 ];
+
+function hasFinePointer() {
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}

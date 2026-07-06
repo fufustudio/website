@@ -12,13 +12,16 @@ declare const styles: {
   readonly glowClayAlt: string;
   readonly glowYellow: string;
   readonly glowYellowAlt: string;
+  readonly indicator: string;
   readonly item: string;
   readonly list: string;
   readonly mobilePanel: string;
+  readonly mobilePanelInner: string;
   readonly num: string;
   readonly open: string;
   readonly root: string;
   readonly summary: string;
+  readonly title: string;
   readonly trigger: string;
 };
 export = styles;
