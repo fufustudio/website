@@ -1,0 +1,55 @@
+.notice {
+  border-block: 1px solid var(--color-divider-subtle);
+  padding-block: var(--space-5);
+  color: var(--color-fg);
+  font-size: var(--font-size-body-compact);
+  line-height: var(--line-height-body);
+}
+
+.notice > * + * {
+  margin-top: 0.35rem;
+}
+
+.policySection {
+  padding-block-start: 0;
+}
+
+.content {
+  display: grid;
+  gap: 2.75rem;
+}
+
+.block {
+  max-width: 760px;
+}
+
+.blockHeading {
+  margin-bottom: var(--space-4);
+}
+
+.block p {
+  font-size: var(--font-size-body-md);
+  line-height: var(--line-height-prose);
+}
+
+.block p + p {
+  margin-top: 0.9rem;
+}
+
+.providerList,
+.linkList {
+  margin-top: var(--space-4);
+  padding-left: 1.2rem;
+}
+
+.providerList {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-prose);
+}
+
+.linkList {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  padding-left: 0;
+}

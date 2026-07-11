@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { ImageProps } from "next/image";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
 const aspects = {
@@ -31,7 +31,7 @@ export function ImageFrame({
         alt={image.alt}
         fill
         sizes={image.sizes ?? "(min-width: 1024px) 48vw, 100vw"}
-        priority={image.priority}
+        preload={image.preload}
         quality={image.quality}
         placeholder={image.placeholder}
         blurDataURL={image.blurDataURL}
@@ -51,7 +51,7 @@ export type ImageFrameImage = {
   src: ImageProps["src"];
   alt: string;
   sizes?: string;
-  priority?: boolean;
+  preload?: boolean;
   quality?: number;
   placeholder?: ImageProps["placeholder"];
   blurDataURL?: string;

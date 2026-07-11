@@ -1,0 +1,30 @@
+.root {
+  margin: 0;
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-label);
+  text-transform: uppercase;
+}
+
+.sans {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: var(--font-weight-label);
+  letter-spacing: var(--letter-spacing-label-wide);
+}
+
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: var(--font-weight-control);
+  letter-spacing: var(--letter-spacing-control);
+}
+
+.toneAccent {
+  color: var(--eyebrow-color, var(--color-accent));
+}
+
+.toneInherit {
+  color: inherit;
+}
+
+.toneLight {
+  color: var(--color-light);
+}

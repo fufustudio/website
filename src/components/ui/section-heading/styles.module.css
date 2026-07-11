@@ -12,60 +12,40 @@
 }
 
 .sm {
-  max-width: 520px;
+  max-width: var(--content-width-sm);
 }
 
 .md {
-  max-width: 680px;
+  max-width: var(--content-width-md);
 }
 
 .lg {
-  max-width: 900px;
-}
-
-.eyebrow {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.6;
-  color: rgb(18 19 26 / 0.5);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  max-width: var(--content-width-lg);
 }
 
 .gapDefault {
-  margin-bottom: 3.5rem;
+  margin-bottom: var(--space-heading-gap-default);
 }
 
 .gapSpacious {
-  margin-bottom: 4rem;
+  margin-bottom: var(--space-heading-gap-spacious);
 }
 
 .headingAfterEyebrow {
-  margin-top: 1rem;
+  margin-top: var(--space-4);
 }
 
 .intro {
-  margin-top: 1.25rem;
-  font-size: 16px;
-  line-height: 1.6;
+  margin-top: var(--space-5);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
 }
 
 .center .intro {
   margin-inline: auto;
-  max-width: 520px;
+  max-width: var(--content-width-sm);
 }
 
 .left .intro {
-  max-width: 560px;
-}
-
-@media (min-width: 640px) {
-  .gapDefault {
-    margin-bottom: 3.75rem;
-  }
-
-  .gapSpacious {
-    margin-bottom: 5rem;
-  }
+  max-width: 35rem;
 }

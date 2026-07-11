@@ -14,9 +14,19 @@ updates:
           - eslint-config-next
       sanity:
         patterns:
-          - sanity
-          - next-sanity
           - "@sanity/*"
+  - package-ecosystem: npm
+    directory: /studio
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      sanity-studio:
+        patterns:
+          - sanity
+          - "@sanity/*"
+          - react
+          - react-dom
   - package-ecosystem: github-actions
     directory: /
     schedule:

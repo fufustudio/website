@@ -16,7 +16,7 @@ const forbidden = [
 const ignoredGlobs = [
   "package-lock.json",
   "sanity.types.ts",
-  "schema.json",
+  "studio/schema.json",
   "scripts/check-template-clean.mjs",
   ".generated/**",
   "node_modules/**",

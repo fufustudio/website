@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 import { useId } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
 type InputFieldProps = {

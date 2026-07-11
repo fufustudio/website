@@ -1,0 +1,30 @@
+.root {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1000;
+}
+
+.link {
+  display: inline-flex;
+  min-height: var(--control-min-height);
+  align-items: center;
+  border: 1px solid var(--color-muted);
+  border-radius: var(--radius-button);
+  padding: 0.65rem var(--space-4);
+  background: var(--color-fg);
+  color: var(--color-bg);
+  font: inherit;
+  text-decoration: none;
+  box-shadow: var(--shadow-floating);
+}
+
+.link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.link:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}

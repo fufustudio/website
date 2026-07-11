@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Children, isValidElement } from "react";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
 type DividerGridProps = {
@@ -21,7 +22,7 @@ export function DividerGrid({
 
   return (
     <div
-      className={classNames(
+      className={cn(
         columns === 4 ? styles.columns4 : styles.columns2,
         className,
       )}
@@ -30,7 +31,7 @@ export function DividerGrid({
       {items.map((child, index) => (
         <div
           key={isValidElement(child) && child.key ? child.key : index}
-          className={classNames(
+          className={cn(
             dividerClasses(index, items.length, columns, twoColumnBreakpoint),
             itemClassName,
           )}
@@ -40,10 +41,6 @@ export function DividerGrid({
       ))}
     </div>
   );
-}
-
-function classNames(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
 }
 
 function dividerClasses(

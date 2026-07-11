@@ -1,19 +1,6 @@
-# fufu-starter
+# Fufu Studio Website
 
-Fufu house starter for fast, consistent Next.js site builds.
-
-## Barebones Launch
-
-This repo is currently configured for a home-only launch:
-
-- `/` renders the Sanity `page` document with slug `home`, falling back to
-  `Hello world` / `Powered by Sanity.`
-- `/studio` uses Sanity project `8l26et78` and dataset `production`.
-- The homepage message form posts to `/api/contact` and sends through Resend to
-  `hello@fufu.studio`.
-
-Use a rotated Resend key in `RESEND_API_KEY`; do not reuse any key shared in
-chat or commit secrets to the repo.
+Interim Fufu Studio website built on the current Fufu house starter.
 
 ## Agent Entry
 
@@ -25,10 +12,49 @@ Read [AGENTS.md](./AGENTS.md), then use:
 - [docs/client-build-plan.template.md](./docs/client-build-plan.template.md) for the live build checklist.
 - [docs/security.md](./docs/security.md) for security, privacy, and consent checks.
 
-## Handoff
+## Application Shape
+
+The web app ships with `/`, `/privacy`, `/api/contact`, and metadata routes.
+Without Sanity credentials it uses the local Fufu content baseline. Once
+Sanity is configured, `siteSettings` and the `home` page become required and
+CMS failures surface instead of silently publishing fallback content. The
+homepage remains deliberately sparse until the redesign is ready, while its
+contact form retains Resend delivery and shared Upstash rate limiting.
+
+Sanity Studio is a separate application in `studio/`. Install and run the two
+apps independently. Its Presentation tool can load the Next.js site with live
+draft content and click-to-edit overlays when the optional preview environment
+variables are configured:
+
+```bash
+npm install
+npm --prefix studio install
+npm run dev
+npm run studio:dev
+```
+
+## Styling
+
+The website uses native CSS and colocated CSS Modules; Tailwind is not part of
+the baseline. Shared design decisions live as semantic custom properties in
+`src/app/(site)/globals.css`, while component modules own local structure and
+states. Use the low-level `Heading` and `Eyebrow` primitives for shared heading
+and label treatments.
+
+## Verification
+
+Use the full local gate while shaping website changes:
+
+```bash
+npm run verify
+```
+
+Use the template gate after structural changes so generated files and repository
+cleanliness are checked:
 
 ```bash
 npm run verify:template
 ```
 
-Use `npm run verify:handoff` for client-site handoff when Playwright is ready.
+Use `npm run verify:handoff` for client-site handoff after production env vars
+and client fallback content are configured.

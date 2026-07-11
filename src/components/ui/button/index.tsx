@@ -1,7 +1,7 @@
 import Link, { type LinkProps } from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import type { PatternHref } from "@/components/types";
-import { cn } from "@/lib/cn";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
 export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost";

@@ -3,12 +3,9 @@ import {
   imageBlurData,
   imageSrc,
   type SanityImageValue,
-} from "@/lib/cms-images";
+} from "@/config/cms-images";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
-
-function classNames(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
 
 export function BackgroundImageLayer({
   image,
@@ -32,7 +29,7 @@ export function BackgroundImageLayer({
   return (
     <Image
       alt={alt}
-      className={classNames(styles.image, className)}
+      className={cn(styles.image, className)}
       decoding="async"
       fetchPriority={eager ? "high" : undefined}
       fill

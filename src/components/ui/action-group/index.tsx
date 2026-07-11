@@ -7,7 +7,7 @@ import {
   type ButtonVariant,
 } from "@/components/ui/button";
 import { TrackedLink } from "@/components/ui/tracked-link";
-import { cn } from "@/lib/cn";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
 const alignments = {

@@ -1,0 +1,80 @@
+.root,
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.honeypot {
+  position: absolute;
+  left: -9999px;
+}
+
+.pending {
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.field {
+  width: 100%;
+  border: 1px solid var(--color-field-border);
+  border-radius: 0;
+  background-color: var(--color-field-surface);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-control);
+  color: var(--color-light);
+  outline: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.field::placeholder {
+  color: var(--color-field-placeholder);
+}
+
+.field:focus-visible {
+  border-color: var(--color-field-border-focus);
+  background-color: var(--color-field-surface-focus);
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.note,
+.success,
+.error,
+.privacyNotice {
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body);
+}
+
+.note,
+.privacyNotice {
+  color: var(--color-light);
+}
+
+.success {
+  color: var(--color-accent-soft);
+}
+
+.error {
+  color: var(--color-light);
+}
+
+.submit {
+  align-self: flex-start;
+}
+
+.privacyLink {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--color-on-dark-underline);
+  text-underline-offset: 0.18em;
+}
+
+.privacyLink:hover {
+  text-decoration-color: currentColor;
+}

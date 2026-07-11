@@ -1,48 +1,54 @@
-import { Resend } from "resend";
-import { ContactNotificationEmail } from "@/components/email/contact-notification";
-import { optionalEnvValue } from "@/lib/env";
+import {
+  inquiryErrors,
+  isContactInquiryPayload,
+  isHoneypotSubmission,
+  normalizeInquiry,
+  validateInquiry,
+} from "@/contracts/contact";
+import { checkContactRateLimit } from "./lib/rate-limit";
+import { sendInquiry } from "./lib/send-inquiry";
+import { readJsonBody } from "./lib/read-json-body";
 
-type InquiryPayload = {
-  name?: unknown;
-  email?: unknown;
-  message?: unknown;
-  source?: unknown;
-  company?: unknown;
-  botcheck?: unknown;
-};
-
-type Inquiry = {
-  name: string;
-  email: string;
-  message: string;
-  source: string;
-};
-
-const fieldLimits = {
-  name: 120,
-  email: 254,
-  message: 1200,
-  source: 80,
-};
-
-const destinationEmail = "hello@fufu.studio";
-const nameError = "Please enter your name.";
-const emailError = "Please enter a valid email address.";
-const validationError = "Please enter a short message.";
-const lengthError = "Please shorten your message and try again.";
-const configError =
-  "The form provider is not configured yet. Add the required Resend environment variables.";
-const providerError =
-  "Something went wrong sending your message. Please try again after the provider is configured.";
+const deliveryError = "We could not send your message. Please try again later.";
 
 export async function POST(request: Request) {
-  let payload: InquiryPayload;
+  const rateLimit = await checkContactRateLimit(request);
 
-  try {
-    payload = (await request.json()) as InquiryPayload;
-  } catch {
-    return contactResponse(false, validationError, 400);
+  if (rateLimit.status === "unavailable") {
+    console.error(
+      `[contact] Missing rate-limit configuration: ${rateLimit.missingEnvVars.join(", ")}`,
+    );
+    return contactResponse(false, deliveryError, 503);
   }
+
+  if (rateLimit.status === "limited") {
+    return contactResponse(
+      false,
+      "Too many requests. Please wait and try again.",
+      429,
+      { "Retry-After": String(rateLimit.retryAfter) },
+    );
+  }
+
+  const body = await readJsonBody(request);
+
+  if (!body.ok && body.reason === "unsupported-media") {
+    return contactResponse(false, "Send this form as JSON.", 415);
+  }
+
+  if (!body.ok && body.reason === "too-large") {
+    return contactResponse(false, "The request is too large.", 413);
+  }
+
+  if (!body.ok) {
+    return contactResponse(false, inquiryErrors.invalid, 400);
+  }
+
+  if (!isContactInquiryPayload(body.value)) {
+    return contactResponse(false, inquiryErrors.invalid, 400);
+  }
+
+  const payload = body.value;
 
   if (isHoneypotSubmission(payload)) {
     return contactResponse(true);
@@ -55,105 +61,30 @@ export async function POST(request: Request) {
     return contactResponse(false, validation, 400);
   }
 
-  const apiKey = optionalEnvValue(process.env.RESEND_API_KEY);
-  const fromEmail = optionalEnvValue(process.env.RESEND_FROM_EMAIL);
-  const toEmail =
-    optionalEnvValue(process.env.RESEND_TO_EMAIL) ?? destinationEmail;
+  const delivery = await sendInquiry(inquiry);
 
-  if (!apiKey || !fromEmail) {
-    return contactResponse(false, configError, 500);
+  if (!delivery.success && delivery.reason === "configuration") {
+    console.error(
+      `[contact] Missing provider configuration: ${delivery.missingEnvVars.join(", ")}`,
+    );
+    return contactResponse(false, deliveryError, 503);
   }
 
-  try {
-    const resend = new Resend(apiKey);
-    const { data, error } = await resend.emails.send({
-      from: fromEmail,
-      to: [toEmail],
-      replyTo: inquiry.email,
-      subject: "New website contact",
-      text: inquiryText(inquiry),
-      react: ContactNotificationEmail(inquiry),
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return contactResponse(true, undefined, 200, data?.id);
-  } catch (error) {
-    console.error("[contact] Resend provider error:", error);
-    return contactResponse(false, providerError, 502);
+  if (!delivery.success) {
+    return contactResponse(false, deliveryError, 502);
   }
+
+  return contactResponse(true);
 }
 
 function contactResponse(
   success: boolean,
   message?: string,
   status = 200,
-  id?: string,
+  headers?: HeadersInit,
 ) {
   return Response.json(
-    { success, ...(message ? { message } : {}), ...(id ? { id } : {}) },
-    { status },
+    { success, ...(message ? { message } : {}) },
+    { status, headers },
   );
-}
-
-function isHoneypotSubmission(payload: InquiryPayload) {
-  return (
-    normalizeField(payload.company).length > 0 ||
-    payload.botcheck === true ||
-    payload.botcheck === "on" ||
-    payload.botcheck === "true"
-  );
-}
-
-function normalizeInquiry(payload: InquiryPayload): Inquiry {
-  return {
-    name: normalizeField(payload.name),
-    email: normalizeField(payload.email).toLowerCase(),
-    message: normalizeField(payload.message),
-    source: normalizeField(payload.source) || "home",
-  };
-}
-
-function normalizeField(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function validateInquiry(inquiry: Inquiry) {
-  if (
-    inquiry.name.length > fieldLimits.name ||
-    inquiry.email.length > fieldLimits.email ||
-    inquiry.message.length > fieldLimits.message ||
-    inquiry.source.length > fieldLimits.source
-  ) {
-    return lengthError;
-  }
-
-  if (!inquiry.name) {
-    return nameError;
-  }
-
-  if (!isValidEmail(inquiry.email)) {
-    return emailError;
-  }
-
-  if (!inquiry.message) {
-    return validationError;
-  }
-
-  return null;
-}
-
-function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-}
-
-function inquiryText(inquiry: Inquiry) {
-  return [
-    `Name: ${inquiry.name}`,
-    `Email: ${inquiry.email}`,
-    `Message: ${inquiry.message}`,
-    `Source: ${inquiry.source}`,
-  ].join("\n");
 }

@@ -1,0 +1,35 @@
+.root {
+  margin: 0;
+  font-family: var(--font-heading), Georgia, serif;
+  font-weight: var(--font-weight-heading);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-heading);
+}
+
+.display {
+  font-size: var(--font-size-heading-display);
+}
+
+.section {
+  font-size: var(--font-size-heading-section);
+}
+
+.module {
+  font-size: var(--font-size-heading-module);
+}
+
+.item {
+  font-size: var(--font-size-heading-item);
+}
+
+.toneDefault {
+  color: var(--heading-color, var(--color-fg));
+}
+
+.toneInherit {
+  color: inherit;
+}
+
+.toneLight {
+  color: var(--color-light);
+}

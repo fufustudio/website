@@ -1,0 +1,33 @@
+{
+  "name": "fufu-starter-studio",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@10.9.7",
+  "engines": {
+    "node": ">=22 <23",
+    "npm": ">=10 <11"
+  },
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "typegen": "sanity schema extract --enforce-required-fields && sanity typegen generate",
+    "seed": "sanity exec scripts/seed-sanity.ts --with-user-token",
+    "seed:force": "sanity exec scripts/seed-sanity.ts --with-user-token -- --force",
+    "validate-content": "sanity exec scripts/validate-sanity-content.ts",
+    "repair-keys": "sanity exec scripts/repair-sanity-array-keys.ts --with-user-token",
+    "repair-keys:apply": "sanity exec scripts/repair-sanity-array-keys.ts --with-user-token -- --apply"
+  },
+  "dependencies": {
+    "@sanity/icons": "^3.7.4",
+    "@sanity/vision": "^5.31.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "sanity": "^5.31.1",
+    "styled-components": "^6.1.19"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}

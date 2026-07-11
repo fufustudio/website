@@ -20,12 +20,16 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            studio/package-lock.json
       - run: npm ci
+      - run: npm ci --prefix studio
       - name: Cache Next.js build output
         uses: actions/cache@v4
         with:
           path: .next/cache
-          key: ${{ runner.os }}-next-${{ hashFiles('package-lock.json') }}-${{ hashFiles('next.config.*', 'postcss.config.*', 'src/**/*') }}
+          key: ${{ runner.os }}-next-${{ hashFiles('package-lock.json') }}-${{ hashFiles('next.config.*', 'src/**/*') }}
           restore-keys: |
             ${{ runner.os }}-next-${{ hashFiles('package-lock.json') }}-
             ${{ runner.os }}-next-

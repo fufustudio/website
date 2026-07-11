@@ -23,27 +23,21 @@
 }
 
 .widthSm {
-  max-width: 520px;
+  max-width: var(--content-width-sm);
 }
 
 .widthMd {
-  max-width: 680px;
+  max-width: var(--content-width-md);
 }
 
 .widthLg {
-  max-width: 900px;
+  max-width: var(--content-width-lg);
 }
 
 .widthXl {
-  max-width: 1120px;
+  max-width: var(--content-width-xl);
 }
 
 .hasChildren {
-  margin-bottom: 1rem;
-}
-
-@media (min-width: 640px) {
-  .hasChildren {
-    margin-bottom: 3.75rem;
-  }
+  margin-bottom: var(--space-page-header-children);
 }

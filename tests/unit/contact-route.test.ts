@@ -20,10 +20,10 @@ vi.mock("resend", () => ({
 import { POST } from "@/app/api/contact/route";
 
 const validPayload = {
-  name: "Test Sender",
-  email: "sender@example.com",
-  message: "Testing the launch form.",
-  source: "home",
+  name: "Ada Lovelace",
+  email: "ada@example.com",
+  interest: "Strategy",
+  message: "Please tell me more about the project.",
 };
 
 describe("POST /api/contact", () => {
@@ -33,17 +33,56 @@ describe("POST /api/contact", () => {
     sendMock.mockReset();
     delete process.env.RESEND_API_KEY;
     delete process.env.RESEND_FROM_EMAIL;
+    delete process.env.RESEND_TO_EMAIL;
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    delete process.env.KV_REST_API_URL;
+    delete process.env.KV_REST_API_TOKEN;
   });
 
   it("returns a configuration error when Resend env vars are missing", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const res = await POST(jsonRequest(validPayload));
     const body = await res.json();
 
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(503);
     expect(body).toEqual({
       success: false,
-      message:
-        "The form provider is not configured yet. Add the required Resend environment variables.",
+      message: "We could not send your message. Please try again later.",
+    });
+    expect(JSON.stringify(body)).not.toContain("RESEND_API_KEY");
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("RESEND_API_KEY"),
+    );
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it("requires JSON before reading the contact payload", async () => {
+    const res = await POST(
+      new Request("https://example.com/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(validPayload),
+      }),
+    );
+
+    expect(res.status).toBe(415);
+    await expect(res.json()).resolves.toEqual({
+      success: false,
+      message: "Send this form as JSON.",
+    });
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a body larger than the route budget before delivery", async () => {
+    const res = await POST(
+      jsonRequest({ ...validPayload, ignored: "x".repeat(20_000) }),
+    );
+
+    expect(res.status).toBe(413);
+    await expect(res.json()).resolves.toEqual({
+      success: false,
+      message: "The request is too large.",
     });
     expect(sendMock).not.toHaveBeenCalled();
   });
@@ -62,54 +101,18 @@ describe("POST /api/contact", () => {
     expect(sendMock).not.toHaveBeenCalled();
   });
 
-  it("rejects missing email submissions", async () => {
-    const res = await POST(jsonRequest({ ...validPayload, email: "" }));
-    const body = await res.json();
-
-    expect(res.status).toBe(400);
-    expect(body).toEqual({
-      success: false,
-      message: "Please enter a valid email address.",
-    });
-    expect(sendMock).not.toHaveBeenCalled();
-  });
-
-  it("rejects missing name submissions", async () => {
-    const res = await POST(jsonRequest({ ...validPayload, name: "" }));
-    const body = await res.json();
-
-    expect(res.status).toBe(400);
-    expect(body).toEqual({
-      success: false,
-      message: "Please enter your name.",
-    });
-    expect(sendMock).not.toHaveBeenCalled();
-  });
-
-  it("rejects invalid email submissions", async () => {
-    const res = await POST(jsonRequest({ ...validPayload, email: "nope" }));
-    const body = await res.json();
-
-    expect(res.status).toBe(400);
-    expect(body).toEqual({
-      success: false,
-      message: "Please enter a valid email address.",
-    });
-    expect(sendMock).not.toHaveBeenCalled();
-  });
-
-  it("rejects missing and oversized messages", async () => {
-    const invalid = await POST(jsonRequest({ ...validPayload, message: "" }));
+  it("rejects invalid and oversized submissions", async () => {
+    const invalid = await POST(jsonRequest({ ...validPayload, email: "nope" }));
     const invalidBody = await invalid.json();
 
     expect(invalid.status).toBe(400);
     expect(invalidBody).toEqual({
       success: false,
-      message: "Please enter a short message.",
+      message: "Please enter a valid email address.",
     });
 
     const oversized = await POST(
-      jsonRequest({ ...validPayload, message: "x".repeat(1201) }),
+      jsonRequest({ ...validPayload, message: "x".repeat(3001) }),
     );
     const oversizedBody = await oversized.json();
 
@@ -121,34 +124,48 @@ describe("POST /api/contact", () => {
     expect(sendMock).not.toHaveBeenCalled();
   });
 
-  it("sends valid messages through Resend", async () => {
+  it.each([null, [], "not an object", 42, true])(
+    "rejects a malformed JSON root (%j) without crashing",
+    async (payload) => {
+      const res = await POST(jsonRequest(payload));
+
+      expect(res.status).toBe(400);
+      await expect(res.json()).resolves.toEqual({
+        success: false,
+        message: "Please share your name, email, and a short message.",
+      });
+      expect(sendMock).not.toHaveBeenCalled();
+    },
+  );
+
+  it("sends valid inquiries through Resend", async () => {
     process.env.RESEND_API_KEY = "re_test";
-    process.env.RESEND_FROM_EMAIL = "Fufu <hello@fufu.studio>";
+    process.env.RESEND_FROM_EMAIL = "Website <hello@starter.test>";
+    process.env.RESEND_TO_EMAIL = "inquiries@starter.test";
     sendMock.mockResolvedValue({ data: { id: "email-id" }, error: null });
 
     const res = await POST(jsonRequest(validPayload));
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(body).toEqual({ success: true, id: "email-id" });
+    expect(body).toEqual({ success: true });
     expect(ResendMock).toHaveBeenCalledWith("re_test");
     expect(sendMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        from: "Fufu <hello@fufu.studio>",
-        to: ["hello@fufu.studio"],
-        replyTo: "sender@example.com",
+        from: "Website <hello@starter.test>",
+        to: "inquiries@starter.test",
         subject: "New website contact",
-        text: expect.stringMatching(
-          /Name: Test Sender[\s\S]*Email: sender@example\.com[\s\S]*Message: Testing the launch form\./,
-        ),
-        react: expect.anything(),
+        replyTo: "ada@example.com",
+        text: expect.stringContaining("Interest: Strategy"),
+        html: expect.stringContaining("New website contact."),
       }),
     );
   });
 
   it("returns a safe error when Resend fails", async () => {
     process.env.RESEND_API_KEY = "re_test";
-    process.env.RESEND_FROM_EMAIL = "Fufu <hello@fufu.studio>";
+    process.env.RESEND_FROM_EMAIL = "Website <hello@starter.test>";
+    process.env.RESEND_TO_EMAIL = "inquiries@starter.test";
     sendMock.mockResolvedValue({
       data: null,
       error: { message: "Provider details" },
@@ -161,8 +178,7 @@ describe("POST /api/contact", () => {
     expect(res.status).toBe(502);
     expect(body).toEqual({
       success: false,
-      message:
-        "Something went wrong sending your message. Please try again after the provider is configured.",
+      message: "We could not send your message. Please try again later.",
     });
   });
 });

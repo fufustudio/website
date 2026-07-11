@@ -43,6 +43,9 @@ the handoff summary.
   text outside the design.
 - Treat Sanity as the client-build baseline. Keep the starter's local fallback
   working only so development and CI can run before credentials are configured.
+- Once schemas exist and credentials are available, seed the real client copy
+  and media into Sanity. Remove project-specific local fallback content and
+  image files after the live dataset is the source of truth.
 - Identify reusable content and editor-owned content from the design.
 - Keep pages thin: they compose content, data helpers, and reusable components.
 - Model Sanity fields semantically. Do not create fields that only describe the
@@ -70,11 +73,17 @@ the handoff summary.
   implementation.
 - Use `next/image` for meaningful images and provide stable dimensions or
   aspect-ratio constraints.
+- Upload editor-owned and page-content images to Sanity, capture required alt
+  text and focal points there, and use the existing Sanity image helpers to
+  request responsive widths.
+- Keep local image files only for true app chrome, generated metadata assets,
+  or temporary no-credential scaffolding. Delete temporary client-media copies
+  once Sanity is seeded.
 - Record focal points, required alt text, decorative image decisions, and export
   formats in the live build plan.
 - Promote reusable color, typography, and spacing decisions to theme tokens in
-  `src/app/globals.css`; mirror OpenGraph-critical values in
-  `src/lib/theme.ts`.
+  `src/app/(site)/globals.css`; mirror OpenGraph-critical values in
+  `src/config/theme.ts`.
 
 ## Implementation Sequence
 
@@ -119,9 +128,10 @@ the handoff summary.
 
 ## Launch/Handoff
 
-- Run `npm run verify:template` before starter handoff.
+- Run `npm run verify:template` before starter/template handoff.
 - Use `npm run verify:handoff` as the semantic final gate for client projects
-  when Playwright browsers are available.
+  when production env vars, launch placeholders, and Playwright browsers are
+  ready.
 - Include handoff notes from the live build plan: changed routes, removed
   starter routes, Sanity changes, environment variables, forms, analytics,
   verification results, responsive/browser QA, known gaps, and open questions.

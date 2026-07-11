@@ -30,11 +30,13 @@ the design or repo. Close rows when answered.
 Record route QA, browser/responsive checks, accessibility checks, and commands
 as they are completed.
 
-| Check                     | Target      | Result  | Notes |
-| ------------------------- | ----------- | ------- | ----- |
-| `npm run verify:quick`    | repo        | not run |       |
-| `npm run verify:template` | repo        | not run |       |
-| `npm run verify:handoff`  | client site | not run |       |
+| Check                     | Target           | Result  | Notes |
+| ------------------------- | ---------------- | ------- | ----- |
+| `npm run verify:quick`    | repo             | not run |       |
+| `npm run verify`          | repo             | not run |       |
+| `npm run verify:template` | starter/template | not run |       |
+| `npm run launch:check`    | client site      | not run |       |
+| `npm run verify:handoff`  | client site      | not run |       |
 
 ## Handoff Notes
 

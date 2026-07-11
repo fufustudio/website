@@ -1,112 +1,110 @@
-import { existsSync, readdirSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { basename, dirname, join, relative } from "node:path";
 
-const componentRoot = join(process.cwd(), "src/components");
 const appRoot = join(process.cwd(), "src/app");
-const routeConventionFiles = new Set([
-  "default.tsx",
-  "error.tsx",
-  "forbidden.tsx",
-  "global-error.tsx",
-  "icon.tsx",
-  "instrumentation.ts",
-  "layout.tsx",
-  "loading.tsx",
-  "manifest.ts",
-  "not-found.tsx",
-  "opengraph-image.tsx",
-  "page.tsx",
-  "robots.ts",
-  "route.ts",
-  "route.tsx",
-  "sitemap.ts",
-  "template.tsx",
-  "twitter-image.tsx",
-  "unauthorized.tsx",
-]);
+const siteRoot = join(appRoot, "(site)");
+const sharedComponentsRoot = join(process.cwd(), "src/components");
 
 function walk(dir) {
-  const entries = readdirSync(dir);
   const files = [];
 
-  for (const entry of entries) {
+  for (const entry of readdirSync(dir)) {
     const path = join(dir, entry);
     const stat = statSync(path);
-
-    if (stat.isDirectory()) {
-      files.push(...walk(path));
-    } else {
-      files.push(path);
-    }
+    files.push(...(stat.isDirectory() ? walk(path) : [path]));
   }
 
   return files;
 }
 
-function isSourceComponentFile(path) {
-  if (!/\.(ts|tsx)$/.test(path)) return false;
-  return true;
-}
-
-function isCssModuleFile(path) {
-  return /\.module\.css$/.test(path);
-}
-
 const errors = [];
 
-function validateSourceRoot(root, { allowRouteConventions = false } = {}) {
-  if (!existsSync(root)) return;
+function findImplementationRoots(root) {
+  if (!existsSync(root)) return [];
 
-  const sourceFiles = walk(root).filter(isSourceComponentFile);
-  const filesByDir = new Map();
-
-  for (const file of sourceFiles) {
-    const rel = relative(root, file);
-    const parts = rel.split("/");
-    const filename = parts.at(-1);
-    const isRouteConvention =
-      allowRouteConventions && routeConventionFiles.has(filename);
-
-    if (
-      !isRouteConvention &&
-      filename !== "index.ts" &&
-      filename !== "index.tsx"
-    ) {
-      errors.push(
-        `${relative(process.cwd(), file)} should be moved into its own folder and named index.tsx/index.ts.`,
-      );
-    }
-
-    if (!isRouteConvention) {
-      const dir = parts.slice(0, -1).join("/");
-      filesByDir.set(dir, [...(filesByDir.get(dir) ?? []), rel]);
-    }
+  const roots = [];
+  for (const entry of readdirSync(root)) {
+    const path = join(root, entry);
+    if (!statSync(path).isDirectory()) continue;
+    if (entry === "components" || entry === "features") roots.push(path);
+    roots.push(...findImplementationRoots(path));
   }
-
-  for (const [dir, files] of filesByDir) {
-    if (files.length > 1) {
-      errors.push(
-        `${relative(process.cwd(), join(root, dir)) || "."} contains multiple component source files: ${files.join(", ")}`,
-      );
-    }
-  }
+  return roots;
 }
 
-validateSourceRoot(componentRoot);
-validateSourceRoot(appRoot, { allowRouteConventions: true });
+function validateReactFolders(root) {
+  if (!existsSync(root)) return;
 
-for (const root of [componentRoot, appRoot]) {
-  if (!existsSync(root)) continue;
+  for (const file of walk(root)) {
+    const filename = basename(file);
+    const projectPath = relative(process.cwd(), file);
 
-  for (const file of walk(root).filter(isCssModuleFile)) {
-    const filename = file.split("/").at(-1);
+    if (filename.endsWith(".tsx")) {
+      if (filename !== "index.tsx") {
+        errors.push(
+          `${projectPath} should live in its own kebab-case folder as index.tsx.`,
+        );
+      }
+
+      const folderName = basename(dirname(file));
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(folderName)) {
+        errors.push(`${projectPath} should use a kebab-case component folder.`);
+      }
+    }
+
+    if (!filename.endsWith(".module.css")) continue;
 
     if (filename !== "styles.module.css") {
       errors.push(
-        `${relative(process.cwd(), file)} should be named styles.module.css.`,
+        `${projectPath} should be named styles.module.css inside its component folder.`,
+      );
+    }
+
+    if (!existsSync(join(dirname(file), "index.tsx"))) {
+      errors.push(`${projectPath} should have a sibling index.tsx component.`);
+    }
+  }
+}
+
+const implementationRoots = findImplementationRoots(siteRoot);
+implementationRoots.push(sharedComponentsRoot);
+for (const root of implementationRoots) validateReactFolders(root);
+
+for (const root of [appRoot, sharedComponentsRoot]) {
+  if (!existsSync(root)) continue;
+
+  for (const file of walk(root)) {
+    if (!file.endsWith(".module.css")) continue;
+
+    const source = readFileSync(file, "utf8");
+    if (/(?:#[\da-f]{3,8}|rgba?\()/i.test(source)) {
+      errors.push(
+        `${relative(process.cwd(), file)} contains a raw color; promote it to the globals.css theme contract.`,
       );
     }
   }
+}
+
+for (const root of [siteRoot, sharedComponentsRoot]) {
+  if (!existsSync(root)) continue;
+
+  for (const file of walk(root)) {
+    if (!file.endsWith(".tsx")) continue;
+
+    const source = readFileSync(file, "utf8");
+    if (/<h[1-6]\b/.test(source)) {
+      errors.push(
+        `${relative(process.cwd(), file)} renders a raw heading; use the Heading primitive so semantic level and visual scale stay consistent.`,
+      );
+    }
+  }
+}
+
+const packageJson = readFileSync(join(process.cwd(), "package.json"), "utf8");
+if (/tailwind/i.test(packageJson)) {
+  errors.push(
+    "package.json contains a Tailwind dependency; the styling baseline is native CSS and CSS Modules.",
+  );
 }
 
 if (errors.length) {
@@ -115,4 +113,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log("Component structure check passed.");
+console.log("Shared and route-local component structure check passed.");

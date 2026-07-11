@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
 type ContainerWidth = "sm" | "md" | "lg" | "xl";
@@ -12,10 +13,6 @@ const headingWidths = {
   lg: styles.widthLg,
   xl: styles.widthXl,
 } as const;
-
-function classNames(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
 
 type PageHeaderProps = {
   eyebrow?: ReactNode;
@@ -43,7 +40,7 @@ export function PageHeader({
   const gridLayout = layout === "grid";
   const resolvedContainerSize = width ?? (gridLayout ? "xl" : "md");
   const headerGap = children ? styles.hasChildren : undefined;
-  const headingClasses = classNames(
+  const headingClasses = cn(
     gridLayout && styles.headingGrid,
     gridLayout && headingWidths[headingWidth],
     headerGap,
@@ -53,10 +50,7 @@ export function PageHeader({
     <Section size={sectionSize}>
       <Container
         size={resolvedContainerSize}
-        className={classNames(
-          styles.header,
-          gridLayout ? styles.grid : styles.stack,
-        )}
+        className={cn(styles.header, gridLayout ? styles.grid : styles.stack)}
       >
         <SectionHeading
           eyebrow={eyebrow}
@@ -69,7 +63,7 @@ export function PageHeader({
           className={headingClasses}
         />
         {children && gridLayout ? (
-          <div className={classNames(styles.childrenGrid, headingWidths.xl)}>
+          <div className={cn(styles.childrenGrid, headingWidths.xl)}>
             {children}
           </div>
         ) : (

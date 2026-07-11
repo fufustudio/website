@@ -4,6 +4,14 @@ Fufu Pattern Layer V1 is a source-owned recipe set for basic brochure,
 service, and content sites. It lives in this starter so agents can read,
 modify, and extend the code directly.
 
+Like a source-owned component catalog, the recipes are installed as editable
+starting points rather than as a runtime package. The starter demo does not need
+to render every recipe. Keep broadly useful patterns available, then adapt or
+remove them deliberately once a client design establishes the real component set.
+
+Use this as the detailed API/reference for section recipes and optional
+UI-library policy.
+
 ## Rules
 
 - Prefer primitives, then section recipes, then route-local CSS, then new shared
@@ -13,13 +21,13 @@ modify, and extend the code directly.
   client boundary for optional Vercel Analytics events.
 - Do not add a generic Sanity page-builder schema for these recipes. Model
   client content semantically, then render through the recipes.
-- Do not add Radix, React Aria, CVA, `tailwind-merge`, or styled UI kits by
+- Do not add Radix, React Aria, CVA, or styled UI kits by
   default. Add them only when the project has one of the concrete needs listed
   in Optional Libraries.
 
 ## Shared Types
 
-Shared recipe types live in `src/components/sections/types`.
+Shared recipe types live in `src/components/layout/types.ts`.
 
 ```ts
 type PatternHref = LinkProps<string>["href"] | string;
@@ -37,7 +45,7 @@ type PatternImage = {
   src: ImageProps["src"];
   alt: string;
   sizes?: string;
-  priority?: boolean;
+  preload?: boolean;
   quality?: number;
   placeholder?: ImageProps["placeholder"];
   blurDataURL?: string;
@@ -47,6 +55,9 @@ type PatternImage = {
 
 ## UI Primitives
 
+- `Heading` separates semantic heading level from the shared display, section,
+  module, and item scales.
+- `Eyebrow` owns compact uppercase labels with sans/mono and tone variants.
 - `Button`, `ButtonLink`, and `buttonClasses()` share the same variants and
   sizes.
 - `ActionGroup` renders section CTAs and tracks `event` values when present.
@@ -57,17 +68,22 @@ type PatternImage = {
   `portrait`, `square`, and `wide` aspect options. `PatternImage` can pass
   through image quality, placeholders, blur data URLs, and object position.
 
-## Folder Taxonomy
+## Source Taxonomy
 
 - `src/components/ui`: low-level primitives and helpers that are reusable across
   routes and recipes.
-- `src/components/sections`: reusable page-section recipes composed from UI
-  primitives.
-- `src/components/sections/types`: shared recipe prop types.
-- `src/components/site`: shared site chrome such as header, footer, and
-  header-specific sentinels.
-- `src/app/**`: route composition and route-local components that are not
-  reusable elsewhere.
+- `src/components/layout`: reusable page-section layouts composed
+  from UI primitives, plus shared site chrome such as header, footer, and navigation.
+- `src/components/layout/types.ts`: shared layout recipe prop types.
+- Route-local `components`: page compositions that consume recipes and primitives.
+- `src/app/(site)/**/page.tsx`: public-site URL definitions and thin route adapters.
+
+Every shared React component owns a kebab-case folder, with `index.tsx` and an
+optional colocated `styles.module.css`. For example, `hero-section/index.tsx`
+and `hero-section/styles.module.css` travel together as one component unit.
+Shared category-level type modules such as `layout/types.ts` remain flat.
+Route-local React components use the same `index.tsx` plus `styles.module.css`
+pairing. Start locally and promote a component only when another route needs it.
 
 ## Section Recipes
 
@@ -127,8 +143,6 @@ Add these libraries only when their specific value is needed:
   internationalized inputs, and complex keyboard interaction.
 - CVA: typed class variant composition when a component has many meaningful
   variants, sizes, states, or compound variants that outgrow simple maps.
-- `tailwind-merge`: conflict-safe Tailwind class merging when a project becomes
-  Tailwind-class heavy and consumers pass override utilities.
 - Styled UI kit: useful for dashboards or admin apps where speed and dense
   widgets matter more than bespoke brand expression.
 

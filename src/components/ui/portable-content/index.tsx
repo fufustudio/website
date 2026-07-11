@@ -3,8 +3,10 @@ import {
   type PortableTextBlock,
   type PortableTextComponents,
 } from "@portabletext/react";
+import { Heading } from "@/components/ui/heading";
+import type { SimplePortableText } from "@/sanity/types";
 
-export type PortableTextValue = PortableTextBlock[];
+export type PortableTextValue = SimplePortableText;
 
 const allowedHrefProtocols = new Set(["http:", "https:", "mailto:", "tel:"]);
 
@@ -28,6 +30,28 @@ export function isExternalPortableTextHref(href: string) {
 }
 
 const components: PortableTextComponents = {
+  block: {
+    h1: ({ children }) => (
+      <Heading as="h1" size="section">
+        {children}
+      </Heading>
+    ),
+    h2: ({ children }) => (
+      <Heading as="h2" size="module">
+        {children}
+      </Heading>
+    ),
+    h3: ({ children }) => (
+      <Heading as="h3" size="item">
+        {children}
+      </Heading>
+    ),
+    h4: ({ children }) => (
+      <Heading as="h4" size="item">
+        {children}
+      </Heading>
+    ),
+  },
   marks: {
     link: ({ children, value }) => {
       const href = portableTextHref(value?.href);
@@ -56,7 +80,10 @@ export function PortableContent({
 
   return (
     <div className={className}>
-      <PortableText value={value} components={components} />
+      <PortableText
+        value={value as unknown as PortableTextBlock[]}
+        components={components}
+      />
     </div>
   );
 }

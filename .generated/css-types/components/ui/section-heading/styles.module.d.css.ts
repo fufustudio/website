@@ -1,6 +1,5 @@
 declare const styles: {
   readonly center: string;
-  readonly eyebrow: string;
   readonly gapDefault: string;
   readonly gapSpacious: string;
   readonly headingAfterEyebrow: string;

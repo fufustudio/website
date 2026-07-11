@@ -1,50 +1,63 @@
 # Client Build Plan
 
 - Source brief: `docs/project-brief.md`
-- Source design: Claude design archive, `Website.dc.html` and `Design System.dc.html`
-- Last updated: 2026-07-06
+- Source architecture: sibling `fufu-starter` through commits `fb796e6` and
+  `1e6dffd`, plus its active editor-formatting setup
+- Source design: TBD
+- Last updated: 2026-07-10
 
 ## Inventory
 
-| Area    | Item                     | Source                    | Status   | Notes                                                                   |
-| ------- | ------------------------ | ------------------------- | -------- | ----------------------------------------------------------------------- |
-| Route   | `/` one-page site        | Website design            | complete | Hero, ethos, services, about, contact                                   |
-| Route   | `/privacy`               | Existing local work       | complete | Keep policy route; no footer link in design                             |
-| Brand   | Palette and typography   | Design system             | complete | Instrument fonts, paper/midnight/spectrum tokens                        |
-| Content | Homepage fallback        | Website design            | complete | Typed local content, Sanity-ready                                       |
-| Sanity  | Service capabilities     | Plan                      | complete | Add capability chips to service docs                                    |
-| Motion  | Organic color fields     | Website design            | complete | Canvas soft-body renderer, simplex-noise drift, reduced-motion fallback |
-| Form    | Contact form             | Existing starter + design | complete | Add name, restyle, keep Resend/honeypots/analytics                      |
-| QA      | Responsive/accessibility | Runbook                   | complete | Desktop, mobile, reduced motion                                         |
+| Area         | Item                              | Status   | Notes                                                         |
+| ------------ | --------------------------------- | -------- | ------------------------------------------------------------- |
+| Structure    | Current starter web architecture  | complete | Root Next.js app with route-local page composition            |
+| Studio       | Standalone top-level Sanity app   | complete | Independent package, env, build, and deploy                   |
+| Homepage     | Hero, flexible body, contact      | complete | Minimal interim Fufu content only                             |
+| Components   | Generic UI and layout recipes     | complete | Reusable primitives and section recipes preserved             |
+| Styling      | Native CSS baseline               | complete | Root tokens, native reset, CSS Modules, and text primitives   |
+| Cleanup      | Retired Fufu design and content   | complete | Portraits, motion, bespoke interactions, and old copy removed |
+| Contact      | Resend plus Upstash path          | complete | Shared validation and accessible form states                  |
+| Privacy      | Provider-aware Fufu policy        | complete | Disclosures aligned with configured providers                 |
+| Verification | Root and Studio gates             | complete | Generated files, unit tests, builds, and browser QA           |
+| Starter sync | Latest shared starter conventions | complete | Styling, DOM tests, verification, CI, and Sanity safety       |
 
-## Decisions And Questions
+## Decisions
 
-| Type     | Item               | Owner | Status | Resolution                                                              |
-| -------- | ------------------ | ----- | ------ | ----------------------------------------------------------------------- |
-| Decision | Portrait assets    | User  | closed | Use placeholders; WebP files are spectrum references                    |
-| Decision | Motion approach    | Codex | closed | Canvas 2D soft-body blobs with `simplex-noise`; no PixiJS/Matter/Motion |
-| Decision | Homepage CMS model | Codex | closed | Typed local fallback plus Sanity services; no page builder              |
+| Item                    | Resolution                                                                    |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| Interim visual baseline | Use the neutral starter theme and generic component styles until redesign     |
+| Existing Sanity data    | Preserve without destructive migration; obsolete fields become unexposed      |
+| Public routes           | Keep `/` and `/privacy`; remove embedded `/studio`                            |
+| Studio deployment       | Configure later through independent Studio environment and deploy commands    |
+| Styling architecture    | No Tailwind; shared decisions use root tokens and local selectors use modules |
 
 ## QA And Verification
 
-| Check                     | Target          | Result        | Notes                                                                                             |
-| ------------------------- | --------------- | ------------- | ------------------------------------------------------------------------------------------------- |
-| `npm run verify:quick`    | repo            | pass          | Components, lint, typecheck, unit tests                                                           |
-| `npm run verify:template` | repo            | expected stop | Regenerates CSS/Sanity output, then `check:generated` requires committing changed generated files |
-| Template remainder        | repo            | pass          | `template:clean`, component validation, format, lint, typecheck, unit tests, production build     |
-| Browser desktop           | `/`             | pass          | Direct Playwright at `http://localhost:3001`                                                      |
-| Browser mobile            | `/`             | pass          | No horizontal overflow at 390px wide                                                              |
-| Accessibility             | `/`, `/privacy` | pass          | Axe checks found no violations                                                                    |
-| Reduced motion            | `/`             | pass          | Cursor hidden; organic field does not animate                                                     |
+| Check                     | Result        | Notes                                                                                       |
+| ------------------------- | ------------- | ------------------------------------------------------------------------------------------- |
+| `npm run verify:quick`    | pass          | Component structure, lint, typecheck, and unit tests                                        |
+| `npm run verify`          | pass          | 17 test files, 65 tests, generated types, lint, typecheck, and production build             |
+| `npm run verify:template` | expected stop | Working and Studio gates pass; generated-file cleanliness requires committing this refactor |
+| `npm run studio:build`    | pass          | Standalone Studio production build                                                          |
+| Browser desktop/mobile    | pass          | 21 Playwright checks passed; one desktop-only mobile-nav skip                               |
+| Accessibility             | pass          | Axe found no violations on `/` or `/privacy` at desktop and mobile sizes                    |
+| Configured Sanity build   | pass          | Existing CMS project read without dataset writes                                            |
+| Credential-free build     | pass          | Local Fufu fallback rendered with Sanity variables empty                                    |
+| Preview-token build       | pass          | Draft Mode boundary compiled with a Viewer-token-shaped value                               |
 
 ## Handoff Notes
 
-- Changed routes: `/`, `/privacy`
-- Removed starter routes: none
-- Sanity changes: service documents gain capability chips
-- Env vars changed: none
-- Forms/integrations: contact form still uses Resend and `hello@fufu.studio`
-- Assets requiring follow-up: real Sarah/Danny portrait images
-- Browser/responsive QA: passed on local dev server at `http://localhost:3001`
-- Verification: quick gate and production build pass; full template gate stops only because generated files need to be included in the commit
-- Known gaps: stock `npm run test:e2e` was not run because port 3000 is occupied by another local Next app, and the Playwright config would reuse that server
+- Changed routes: `/`, `/privacy`, `/api/contact`, Draft Mode, metadata, and error routes.
+- Removed route: embedded `/studio`.
+- Sanity: standalone Studio; baseline `siteSettings`, `page`, and `service` schemas.
+- Live dataset: no writes, deletes, or destructive migrations.
+- Assets requiring follow-up: all final redesign assets.
+- Browser/responsive QA: desktop and Pixel 5 projects pass, including keyboard focus and form states.
+- Verification: full local gate, standalone Studio build, configured/fallback
+  builds, and Playwright pass.
+- Latest starter sync: richer heading/eyebrow APIs, DOM interaction tests,
+  simplified verification commands, Next-native env loading, combined provider
+  disclosure checks, and revision-guarded Sanity repair tooling.
+- Known gap: final visual design, production Studio hostname, and production provider configuration remain TBD.
+- Styling baseline: Tailwind and its PostCSS/Prettier plugins are removed;
+  shared headings and eyebrows render through low-level primitives.

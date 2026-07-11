@@ -1,12 +1,9 @@
 import type { ComponentProps, ReactNode } from "react";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
-function classNames(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export function DisclosureList({ className, ...props }: ComponentProps<"div">) {
-  return <div className={classNames(styles.list, className)} {...props} />;
+  return <div className={cn(styles.list, className)} {...props} />;
 }
 
 export function DisclosureItem({
@@ -27,8 +24,8 @@ export function DisclosureItem({
   bodySpacing?: boolean;
 } & Omit<ComponentProps<"details">, "title">) {
   return (
-    <details className={classNames(styles.item, className)} {...props}>
-      <summary className={classNames(styles.summary, summaryClassName)}>
+    <details className={cn(styles.item, className)} {...props}>
+      <summary className={cn(styles.summary, summaryClassName)}>
         <span className={titleClassName}>{title}</span>
         <span className={styles.icon} aria-hidden>
           <svg
@@ -45,7 +42,7 @@ export function DisclosureItem({
         </span>
       </summary>
       <div
-        className={classNames(
+        className={cn(
           styles.body,
           bodySpacing && styles.bodySpaced,
           bodyClassName,

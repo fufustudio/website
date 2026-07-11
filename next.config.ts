@@ -1,8 +1,13 @@
 import type { NextConfig } from "next";
-import bundleAnalyzer from "@next/bundle-analyzer";
+import { sanity as sanityCacheLife } from "next-sanity/live/cache-life";
 import path from "node:path";
+import { sanityImageRemotePatterns } from "./src/config/images";
+import { sanityStudioFrameAncestors } from "./src/config/security";
 
 const isProduction = process.env.NODE_ENV === "production";
+const hasGoogleAnalytics = Boolean(
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim(),
+);
 
 function contentSecurityPolicy(directives: Record<string, string[]>) {
   return Object.entries(directives)
@@ -20,10 +25,6 @@ const sharedSecurityHeaders = [
     value: "strict-origin-when-cross-origin",
   },
   {
-    key: "X-Frame-Options",
-    value: "SAMEORIGIN",
-  },
-  {
     key: "Permissions-Policy",
     value:
       "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()",
@@ -32,7 +33,7 @@ const sharedSecurityHeaders = [
     ? [
         {
           key: "Strict-Transport-Security",
-          value: "max-age=63072000; includeSubDomains; preload",
+          value: "max-age=63072000",
         },
       ]
     : []),
@@ -42,53 +43,15 @@ const publicContentSecurityPolicy = contentSecurityPolicy({
   "default-src": ["'self'"],
   "base-uri": ["'self'"],
   "object-src": ["'none'"],
-  "frame-ancestors": ["'self'"],
+  "frame-ancestors": sanityStudioFrameAncestors(
+    process.env.NEXT_PUBLIC_SANITY_STUDIO_URL,
+    isProduction,
+  ),
   "script-src": [
     "'self'",
     "'unsafe-inline'",
     ...(isProduction ? [] : ["'unsafe-eval'"]),
-    "https://va.vercel-scripts.com",
-    "https://www.googletagmanager.com",
-  ],
-  "style-src": ["'self'", "'unsafe-inline'"],
-  "img-src": [
-    "'self'",
-    "data:",
-    "blob:",
-    "https://cdn.sanity.io",
-    "https://*.sanity.io",
-    "https://maps.gstatic.com",
-    "https://*.googleapis.com",
-    "https://*.googleusercontent.com",
-  ],
-  "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
-  "connect-src": [
-    "'self'",
-    "https://*.sanity.io",
-    "https://*.api.sanity.io",
-    "https://*.apicdn.sanity.io",
-    "https://va.vercel-scripts.com",
-    "https://*.vercel-insights.com",
-    "https://www.google-analytics.com",
-    "https://region1.google-analytics.com",
-  ],
-  "frame-src": ["'self'", "https://maps.google.com", "https://www.google.com"],
-  "form-action": ["'self'"],
-  "manifest-src": ["'self'"],
-  "worker-src": ["'self'", "blob:"],
-});
-
-const studioContentSecurityPolicy = contentSecurityPolicy({
-  "default-src": ["'self'"],
-  "base-uri": ["'self'"],
-  "object-src": ["'none'"],
-  "frame-ancestors": ["'self'"],
-  "script-src": [
-    "'self'",
-    "'unsafe-inline'",
-    "'unsafe-eval'",
-    "https://*.sanity.io",
-    "https://*.sanity-cdn.com",
+    ...(hasGoogleAnalytics ? ["https://www.googletagmanager.com"] : []),
     "https://va.vercel-scripts.com",
   ],
   "style-src": ["'self'", "'unsafe-inline'"],
@@ -98,29 +61,34 @@ const studioContentSecurityPolicy = contentSecurityPolicy({
     "blob:",
     "https://cdn.sanity.io",
     "https://*.sanity.io",
-    "https://*.sanity-cdn.com",
-    "https://*.googleusercontent.com",
+    ...(hasGoogleAnalytics ? ["https://*.google-analytics.com"] : []),
   ],
-  "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
+  "font-src": ["'self'", "data:"],
   "connect-src": [
     "'self'",
     "https://*.sanity.io",
     "https://*.api.sanity.io",
     "https://*.apicdn.sanity.io",
-    "https://*.sanity-cdn.com",
-    "wss://*.sanity.io",
-    "wss://*.api.sanity.io",
+    ...(hasGoogleAnalytics ? ["https://*.google-analytics.com"] : []),
     "https://va.vercel-scripts.com",
     "https://*.vercel-insights.com",
   ],
-  "frame-src": ["'self'", "https://*.sanity.io", "https://*.sanity-cdn.com"],
+  "frame-src": ["'self'"],
   "form-action": ["'self'"],
   "manifest-src": ["'self'"],
   "worker-src": ["'self'", "blob:"],
 });
 
 const nextConfig: NextConfig = {
+  cacheComponents: true,
+  cacheLife: {
+    default: sanityCacheLife,
+  },
+  poweredByHeader: false,
   typedRoutes: true,
+  experimental: {
+    globalNotFound: true,
+  },
   async headers() {
     return [
       {
@@ -133,28 +101,15 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: "/studio/:path*",
-        headers: [
-          ...sharedSecurityHeaders,
-          {
-            key: "Content-Security-Policy",
-            value: studioContentSecurityPolicy,
-          },
-        ],
-      },
     ];
   },
   images: {
-    loader: "custom",
-    loaderFile: "./src/lib/next-image-loader.ts",
     qualities: [75],
+    remotePatterns: sanityImageRemotePatterns(),
   },
   turbopack: {
     root: path.resolve(__dirname),
   },
 };
 
-export default bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-})(nextConfig);
+export default nextConfig;

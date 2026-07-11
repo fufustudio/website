@@ -1,39 +1,59 @@
 # Forms And Analytics
 
-The contact form is a minimal optional provider pattern at
-`src/app/(site)/message-form/index.tsx`.
+The contact form is a minimal reusable provider pattern at
+`src/app/(site)/(home)/components/contact-form/index.tsx`. The starter exposes it on `/`
+without adding a standalone public `/contact` route.
 
 ## Form Behavior
 
-- Validates the visitor name, email, and message fields.
+- Validates name, email, and message.
 - Includes local honeypot fields.
 - Caps submitted field lengths before calling the provider.
-- Submits through the same-origin `/api/contact` route only when Resend is
-  configured with `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and
-  `RESEND_TO_EMAIL`. This launch defaults the recipient to
-  `hello@fufu.studio`.
+- Requires JSON and enforces a 16 KB streamed request-body limit before parsing.
+- Submits through the same-origin `/api/contact` route.
+- Requires `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `RESEND_TO_EMAIL` for
+  production message delivery.
+- Uses Upstash Redis for a shared five-requests-per-ten-minutes rate limit,
+  keyed by a one-way hash of the client address.
+- Requires either `UPSTASH_REDIS_REST_URL` and
+  `UPSTASH_REDIS_REST_TOKEN`, or Vercel Marketplace's `KV_REST_API_URL` and
+  `KV_REST_API_TOKEN`, in production. The route fails closed when either value
+  or a trusted client IP header is unavailable.
 - Shows explicit success and error states.
+- Links to `/privacy` before submission so visitors can review the baseline
+  policy.
 - Tracks `inquiry_submitted` after successful human submission.
-- Sends from the configured site sender, delivers to the configured intake
-  recipient, and sets `replyTo` to the visitor email so inbox replies go back
-  to the submitter.
-- Links to `/privacy` near the submit area so visitors can review how inquiry
-  and analytics data are handled before submitting.
+
+`src/app/api/contact/route.ts` owns the HTTP boundary. Its colocated `lib`
+folder owns the browser-safe request contract, validation, email rendering, and
+Resend delivery. The site form imports that contract so both sides validate the
+same shape without making API code depend on frontend feature code.
 
 Resend requires an API key and a verified sending domain before production
-delivery beyond test-mode limitations.
+delivery beyond test-mode limitations. Provider delivery is capped at ten
+seconds so a slow provider does not hold the route open indefinitely.
 
-Replace the provider when a project needs a full inquiry form, server actions,
-a CRM, a different transactional email provider, or authenticated workflows.
+The limiter runs before the request body is read and returns `429` with
+`Retry-After` when the budget is exhausted. It intentionally allows requests
+without Redis configuration in development and tests so starter verification is
+network-independent. Production fails closed instead. Provider quota alerts and
+hosting/WAF rules are still recommended for defense in depth.
+
+Replace the provider when a project needs server actions, a CRM, a different
+transactional email provider, or authenticated workflows.
 See `docs/security.md` for provider abuse controls and launch privacy guidance.
+Any new provider that touches visitor data must also be reflected in
+`/privacy`.
 
 ## Analytics
 
-Vercel Analytics and Speed Insights are mounted through
-`src/components/scripts/vercel-insights` in the root layout. Google Analytics is
-loaded by `src/components/scripts/google-analytics` from the public site layout
-and configured through `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID`, defaulting to
-`G-Q8ZQF7VMNL`.
+Vercel Analytics and Speed Insights are mounted from
+`src/components/layout/site-scripts/index.tsx`, which is rendered by the web root
+layout. Studio is a separate application and does not load these scripts. Google Analytics 4 is enabled from that script boundary only when
+`NEXT_PUBLIC_GA_MEASUREMENT_ID` is configured.
+
+For Google Analytics, paste only the `G-...` Measurement ID from the Google tag
+setup flow. Do not paste the full Google `<script>` snippet into the app.
 
 Starter events:
 
@@ -41,6 +61,6 @@ Starter events:
 - `inquiry_submitted`
 
 Keep analytics calls near the component that fires them. Rename events intentionally when reporting needs change.
-Do not send email addresses, message contents, names, phone numbers, or other
-contact-form personal information in analytics event names or custom
-properties.
+Reflect any added analytics, ads, chat, heatmaps, CAPTCHA, newsletter, or CRM
+tools in `/privacy` before launch. Run `npm run launch:check` before client
+handoff to catch missing provider disclosures and starter placeholders.

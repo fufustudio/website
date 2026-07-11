@@ -3,20 +3,20 @@
 }
 
 .compact {
-  padding-block: 3rem;
+  padding-block: var(--space-section-compact);
 }
 
 .default {
-  padding-block: 4rem;
+  padding-block: var(--space-section-default);
 }
 
 .page {
-  padding-block-start: 7rem;
-  padding-block-end: 5rem;
+  padding-block-start: var(--space-section-page-start);
+  padding-block-end: var(--space-section-page-end);
 }
 
 .spacious {
-  padding-block: 5rem;
+  padding-block: var(--space-section-spacious);
 }
 
 .toneDefault {
@@ -28,39 +28,14 @@
 }
 
 .muted {
-  background-color: var(--color-surface);
+  background-color: var(--color-section-muted);
 }
 
 .feature {
-  background-color: rgb(222 173 137 / 0.18);
+  background-color: var(--color-section-feature);
 }
 
 .contrast {
   background-color: var(--color-fg);
   color: var(--color-bg);
-}
-
-@media (min-width: 640px) {
-  .compact {
-    padding-block: 4rem;
-  }
-
-  .default {
-    padding-block: 5rem;
-  }
-
-  .page {
-    padding-block-start: 8rem;
-    padding-block-end: 6rem;
-  }
-
-  .spacious {
-    padding-block: 7rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .spacious {
-    padding-block: 8rem;
-  }
 }

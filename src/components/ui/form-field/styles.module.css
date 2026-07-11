@@ -12,19 +12,19 @@
 
 .visibleLabel {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
   font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-label);
+  line-height: var(--line-height-label);
   color: var(--color-fg);
 }
 
 .description,
 .error {
-  margin-top: 0.5rem;
-  font-size: 13px;
-  line-height: 1.45;
+  margin-top: var(--space-2);
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-field-help);
 }
 
 .description {

@@ -12,8 +12,8 @@
   list-style: none;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
-  padding-block: 1.5rem;
+  gap: var(--space-6);
+  padding-block: var(--space-6);
 }
 
 .summary::-webkit-details-marker {
@@ -23,16 +23,16 @@
 .icon {
   flex-shrink: 0;
   color: var(--color-accent);
-  transition: transform 0.3s ease;
+  transition: transform var(--duration-default) var(--ease-standard);
 }
 
 .title {
   font-family: var(--font-heading), Georgia, serif;
-  font-size: clamp(1.25rem, 3vw, 24px);
-  font-weight: 400;
-  line-height: 1.08;
+  font-size: var(--font-size-heading-item);
+  font-weight: var(--font-weight-heading);
+  line-height: var(--line-height-heading);
   color: var(--color-fg);
-  letter-spacing: 0;
+  letter-spacing: var(--letter-spacing-heading);
 }
 
 .item[open] .icon {
@@ -45,12 +45,12 @@
 }
 
 .bodyText {
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
 }
 
 .bodySpaced > * + * {
-  margin-top: 1rem;
+  margin-top: var(--space-4);
 }
 
 @media (prefers-reduced-motion: reduce) {

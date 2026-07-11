@@ -1,4 +1,5 @@
 import type { ComponentProps } from "react";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
 const tones = {
@@ -19,10 +20,6 @@ const sizes = {
 export type SectionTone = keyof typeof tones;
 export type SectionSize = keyof typeof sizes;
 
-function classNames(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export function Section({
   tone = "default",
   size = "default",
@@ -34,7 +31,7 @@ export function Section({
 } & ComponentProps<"section">) {
   return (
     <section
-      className={classNames(styles.root, sizes[size], tones[tone], className)}
+      className={cn(styles.root, sizes[size], tones[tone], className)}
       {...props}
     />
   );

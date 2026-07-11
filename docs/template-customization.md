@@ -8,5 +8,4 @@ When changing the starter:
 - Keep default CI free of live CMS requirements.
 - Keep docs focused on reusable code patterns.
 - Run `npm run verify:template`.
-- Run `npm run template:clean`.
 - Confirm no old client-specific strings, assets, domains, or IDs remain.

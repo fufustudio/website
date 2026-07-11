@@ -1,4 +1,5 @@
 import type { ComponentProps } from "react";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
 const widths = {
@@ -8,19 +9,12 @@ const widths = {
   xl: styles.xl,
 } as const;
 
-function classNames(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export function Container({
   size = "lg",
   className = "",
   ...props
 }: { size?: keyof typeof widths } & ComponentProps<"div">) {
   return (
-    <div
-      className={classNames(styles.root, widths[size], className)}
-      {...props}
-    />
+    <div className={cn(styles.root, widths[size], className)} {...props} />
   );
 }

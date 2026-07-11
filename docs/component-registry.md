@@ -1,13 +1,14 @@
 # Component Registry
 
-Use this registry when translating a design into the starter. Prefer existing
+Use this registry when deciding whether a design should use UI primitives,
+section recipes, route-local code, or new shared components. Prefer existing
 patterns before creating new shared UI.
 
 Selection order:
 
 1. Use UI primitives for page structure and repeated controls.
 2. Use section recipes for recognizable brochure, service, and content sections.
-3. Use route-local CSS Modules for one-off composition.
+3. Use a feature for route/domain composition and behavior.
 4. Add a new shared component only when the pattern repeats or owns behavior.
 
 ## Layout
@@ -26,10 +27,12 @@ Selection order:
 
 - `PageHeader` is for route-level titles and intros.
 - `SectionHeading` is for reusable section labels, headings, and intro copy.
-- Native headings keep document structure; do not pick heading levels only for
-  visual size.
-- Use `.eyebrow`, `.body-*`, and heading utilities from `globals.css` when a
-  shared text treatment is enough.
+- `Heading` is the low-level semantic heading primitive. Choose `as` for
+  document structure, `size` for visual scale, and `tone` for context.
+- `Eyebrow` owns the shared sans/mono label treatment and tone variants.
+- Component CSS Modules use the top-level typography variables for body copy.
+- Raw headings are reserved for non-browser output such as HTML email, where
+  site CSS Modules are unavailable.
 
 ## Buttons And Links
 
@@ -48,7 +51,7 @@ Selection order:
 
 Use `docs/pattern-library.md` for detailed APIs.
 That file also records when to add optional libraries such as Radix, React Aria,
-CVA, `tailwind-merge`, or a styled UI kit.
+CVA, or a styled UI kit.
 
 - `HeroSection` is for first-screen route intros.
 - `SplitSection` is for repeated media-and-copy sections.
@@ -76,18 +79,26 @@ CVA, `tailwind-merge`, or a styled UI kit.
 
 - Use `FormField` for reusable field labeling, descriptions, errors, and
   accessible described-by wiring.
-- Keep provider-specific submission behavior inside the route-level form
-  component unless multiple forms share the same provider.
+- Keep provider-specific submission behavior in the owning feature unless
+  multiple domains share the provider.
 - Preserve honeypots, validation, success/error states, and analytics events.
 
 ## Content Boundaries
 
 - Use `src/content` for local defaults and reused copy.
-- Use `src/lib` for cross-route data helpers, SEO, env parsing, image helpers,
-  and CMS boundaries.
-- Use `src/sanity` for Sanity schema, Studio structure, and client helpers.
-- Use `src/components/site` for shared site chrome such as header, footer, and
-  chrome-specific sentinels.
+- Use `src/data` for server-only content fetching, generated-query result
+  normalization, and local fallback selection.
+- Use `src/config` for site rendering helpers such as SEO, image handling,
+  class names, and the Open Graph theme.
+- Use `src/sanity` for the shared web Sanity client, live integration, and
+  generated-type bridge. Keep site GROQ queries in `src/data/queries`.
+- Use `studio` for schemas, authoring structure, and Studio-specific scripts.
+- Use `src/components/layout` for reusable page-section layouts,
+  shared site chrome, and root-mounted analytics.
+- Keep page composition and one-route behavior in that route's `components`
+  folder. Introduce `features` only for substantial behavior shared across routes.
+- Use `src/components/navigation.ts` for site navigation; `src/config` owns
+  runtime-wide configuration consumed by pages, APIs, and metadata.
 - Keep one-off page copy in a route only when it will not be reused or edited in
   Sanity.
 
@@ -105,3 +116,7 @@ Keep code route-local when:
 - the layout appears once.
 - the styling depends heavily on a single page composition.
 - extracting it would create a generic wrapper with no reusable behavior.
+
+Create or extend a feature when a route has substantial composition, domain
+behavior, client state, validation, or server integrations. Do not create empty
+feature folders for routes a client does not ship.

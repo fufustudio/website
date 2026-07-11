@@ -1,9 +1,6 @@
 import type { ComponentProps } from "react";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
-
-function classNames(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
 
 export function PageShell({
   fixedHeaderOffset = false,
@@ -14,7 +11,7 @@ export function PageShell({
 } & ComponentProps<"div">) {
   return (
     <div
-      className={classNames(
+      className={cn(
         styles.root,
         fixedHeaderOffset && styles.fixedHeaderOffset,
         className,

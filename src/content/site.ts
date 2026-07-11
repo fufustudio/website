@@ -1,5 +1,5 @@
-import { SITE_URL } from "@/lib/site-defaults";
-import type { SiteSettings } from "@/lib/cms";
+import { SITE_URL } from "@/config/site";
+import type { SiteSettings } from "@/data/site-settings";
 
 export const site = {
   name: "Fufu Studio",
@@ -7,10 +7,9 @@ export const site = {
   email: "hello@fufu.studio",
   hours: [],
   primaryActionLabel: "Start a project",
-  primaryActionUrl: "/#contact",
+  primaryActionUrl: "/#message",
   url: SITE_URL,
-  tagline:
-    "Building bespoke sites and software for businesses who care how they show up online.",
+  tagline: "Design and development studio.",
   areaServed: [],
   sameAs: [],
 } satisfies SiteSettings;

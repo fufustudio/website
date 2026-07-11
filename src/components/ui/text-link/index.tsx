@@ -2,7 +2,7 @@ import Link, { type LinkProps } from "next/link";
 import type { ReactNode } from "react";
 import type { PatternHref } from "@/components/types";
 import { TrackedLink } from "@/components/ui/tracked-link";
-import { cn } from "@/lib/cn";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
 type TextLinkProps = {

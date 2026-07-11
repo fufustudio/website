@@ -15,17 +15,35 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
-export type Post = {
+export type Service = {
   _id: string;
-  _type: "post";
+  _type: "service";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
   title: string;
   slug: Slug;
-  publishedAt: string;
-  excerpt: string;
-  body: SimplePortableText;
+  summary?: string;
+  order?: number;
+  active?: boolean;
+};
+
+export type Slug = {
+  _type: "slug";
+  current: string;
+  source?: string;
+};
+
+export type Page = {
+  _id: string;
+  _type: "page";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug: Slug;
+  description?: string;
+  body?: SimplePortableText;
 };
 
 export type SimplePortableText = Array<{
@@ -47,52 +65,6 @@ export type SimplePortableText = Array<{
   _key: string;
 }>;
 
-export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
-};
-
-export type Service = {
-  _id: string;
-  _type: "service";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title: string;
-  slug: Slug;
-  summary?: string;
-  capabilities?: Array<string>;
-  icon?: "circle" | "leaves" | "bud" | "quatrefoil";
-  order?: number;
-  active?: boolean;
-};
-
-export type Page = {
-  _id: string;
-  _type: "page";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title: string;
-  slug: Slug;
-  description?: string;
-  about?: AboutSection;
-  body?: SimplePortableText;
-};
-
-export type AboutSection = {
-  _type: "aboutSection";
-  eyebrow?: string;
-  heading: string;
-  intro?: string;
-  people?: Array<
-    {
-      _key: string;
-    } & TeamMember
-  >;
-};
-
 export type SiteSettings = {
   _id: string;
   _type: "siteSettings";
@@ -107,7 +79,6 @@ export type SiteSettings = {
   hours?: Array<string>;
   primaryActionLabel?: string;
   primaryActionUrl?: string;
-  url?: string;
   tagline?: string;
   areaServed?: Array<string>;
   sameAs?: Array<string>;
@@ -128,15 +99,6 @@ export type PageHeader = {
   eyebrow?: string;
   heading: string;
   intro?: string;
-};
-
-export type TeamMember = {
-  _type: "teamMember";
-  role: string;
-  name: string;
-  href?: string;
-  portrait?: ImageWithAlt;
-  bio: string;
 };
 
 export type SanityImageAssetReference = {
@@ -275,16 +237,13 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
-  | Post
-  | SimplePortableText
-  | Slug
   | Service
+  | Slug
   | Page
-  | AboutSection
+  | SimplePortableText
   | SiteSettings
   | Address
   | PageHeader
-  | TeamMember
   | SanityImageAssetReference
   | ImageWithAlt
   | SanityImageCrop
@@ -299,9 +258,18 @@ export type AllSanitySchemaTypes =
   | SanityImageAsset
   | Geopoint;
 
-// Source: src/lib/cms.ts
+// Source: ../src/data/queries/home-page.ts
+// Variable: homePageQuery
+// Query: *[_type == "page" && slug.current == "home"][0]{    title,    "intro": description,    body  }
+export type HomePageQueryResult = {
+  title: string;
+  intro: string | null;
+  body: SimplePortableText | null;
+} | null;
+
+// Source: ../src/data/queries/site-settings.ts
 // Variable: siteSettingsQuery
-// Query: *[_type == "siteSettings" && _id == "siteSettings"][0]{    name,    contactName,    email,    phone,    address,    hours,    primaryActionLabel,    primaryActionUrl,    url,    tagline,    areaServed,    sameAs  }
+// Query: *[_type == "siteSettings" && _id == "siteSettings"][0]{    name,    contactName,    email,    phone,    address,    hours,    primaryActionLabel,    primaryActionUrl,    tagline,    areaServed,    sameAs  }
 export type SiteSettingsQueryResult = {
   name: string;
   contactName: string | null;
@@ -311,67 +279,16 @@ export type SiteSettingsQueryResult = {
   hours: Array<string> | null;
   primaryActionLabel: string | null;
   primaryActionUrl: string | null;
-  url: string | null;
   tagline: string | null;
   areaServed: Array<string> | null;
   sameAs: Array<string> | null;
 } | null;
 
-// Source: src/lib/cms.ts
-// Variable: homePageQuery
-// Query: *[_type == "page" && slug.current == "home"][0]{    title,    description,    about{      eyebrow,      heading,      intro,      people[]{        _key,        role,        name,        href,        bio,        portrait{          asset->{            _id,            url,            metadata {              lqip,              dimensions { width, height }            }          },          alt,          hotspot,          crop        }      }    },    body  }
-export type HomePageQueryResult = {
-  title: string;
-  description: string | null;
-  about: {
-    eyebrow: string | null;
-    heading: string;
-    intro: string | null;
-    people: Array<{
-      _key: string;
-      role: string;
-      name: string;
-      href: string | null;
-      bio: string;
-      portrait: {
-        asset: {
-          _id: string;
-          url: string;
-          metadata: {
-            lqip: string | null;
-            dimensions: {
-              width: number;
-              height: number;
-            } | null;
-          } | null;
-        } | null;
-        alt: string;
-        hotspot: SanityImageHotspot | null;
-        crop: SanityImageCrop | null;
-      } | null;
-    }> | null;
-  } | null;
-  body: SimplePortableText | null;
-} | null;
-
-// Source: src/lib/cms.ts
-// Variable: servicesQuery
-// Query: *[_type == "service" && active != false] | order(order asc, title asc) {    _key,    title,    "slug": slug.current,    summary,    capabilities,    order  }
-export type ServicesQueryResult = Array<{
-  _key: null;
-  title: string;
-  slug: string;
-  summary: string | null;
-  capabilities: Array<string> | null;
-  order: number | null;
-}>;
-
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '\n  *[_type == "siteSettings" && _id == "siteSettings"][0]{\n    name,\n    contactName,\n    email,\n    phone,\n    address,\n    hours,\n    primaryActionLabel,\n    primaryActionUrl,\n    url,\n    tagline,\n    areaServed,\n    sameAs\n  }\n': SiteSettingsQueryResult;
-    '\n  *[_type == "page" && slug.current == "home"][0]{\n    title,\n    description,\n    about{\n      eyebrow,\n      heading,\n      intro,\n      people[]{\n        _key,\n        role,\n        name,\n        href,\n        bio,\n        portrait{\n          asset->{\n            _id,\n            url,\n            metadata {\n              lqip,\n              dimensions { width, height }\n            }\n          },\n          alt,\n          hotspot,\n          crop\n        }\n      }\n    },\n    body\n  }\n': HomePageQueryResult;
-    '\n  *[_type == "service" && active != false] | order(order asc, title asc) {\n    _key,\n    title,\n    "slug": slug.current,\n    summary,\n    capabilities,\n    order\n  }\n': ServicesQueryResult;
+    '\n  *[_type == "page" && slug.current == "home"][0]{\n    title,\n    "intro": description,\n    body\n  }\n': HomePageQueryResult;
+    '\n  *[_type == "siteSettings" && _id == "siteSettings"][0]{\n    name,\n    contactName,\n    email,\n    phone,\n    address,\n    hours,\n    primaryActionLabel,\n    primaryActionUrl,\n    tagline,\n    areaServed,\n    sameAs\n  }\n': SiteSettingsQueryResult;
   }
 }

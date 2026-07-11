@@ -19,6 +19,7 @@
       }
     ],
     "paths": {
+      "@/site/*": ["./src/app/(site)/*"],
       "@/*": ["./src/*"]
     },
     "rootDirs": ["src", ".generated/css-types"]

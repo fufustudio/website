@@ -1,28 +1,35 @@
 # Project Brief
 
-| Field             | Value                                                     |
-| ----------------- | --------------------------------------------------------- |
-| Project/site name | Fufu Studio                                               |
-| Design source     | Claude design archive: `Play Instrument Pair Updates.zip` |
+| Field             | Value                                    |
+| ----------------- | ---------------------------------------- |
+| Project/site name | Fufu Studio                              |
+| Design source     | New visual direction and content are TBD |
+| Current phase     | Structural reset onto `fufu-starter`     |
 
-## Environment Variables
+## Interim Scope
 
-| Field                            | Value                                            |
-| -------------------------------- | ------------------------------------------------ |
-| `NEXT_PUBLIC_SITE_URL`           | production domain, or `http://localhost:3000`    |
-| `NEXT_PUBLIC_SANITY_PROJECT_ID`  | optional for local fallback                      |
-| `NEXT_PUBLIC_SANITY_DATASET`     | `production`                                     |
-| `NEXT_PUBLIC_SANITY_API_VERSION` | `2026-06-24`                                     |
-| `SANITY_API_READ_TOKEN`          | optional; only for draft/live preview            |
-| `SANITY_REVALIDATE_SECRET`       | optional; only for webhook revalidation          |
-| `RESEND_API_KEY`                 | server-only; required for contact delivery       |
-| `RESEND_FROM_EMAIL`              | verified sender, e.g. `Fufu <hello@fufu.studio>` |
-| `RESEND_TO_EMAIL`                | `hello@fufu.studio` unless changed               |
-| `GOOGLE_SITE_VERIFICATION`       | optional; only for Search Console                |
+- Keep one sparse landing page with hero, flexible content, and contact regions.
+- Keep `/privacy`, the contact API, metadata routes, and reusable layout recipes.
+- Preserve Fufu Studio identity and operational contact/legal facts.
+- Remove the retired palette, typography, portraits, marketing copy, and motion.
+- Run Sanity Studio as an independently deployable top-level application.
 
-## Source Notes
+## Privacy Intake
 
-The Claude design is authoritative for the one-page structure, copy, palette,
-typography, and motion direction. The included WebP files are spectrum
-reference images, not portrait assets. Portrait regions should ship as stable
-placeholders until real photos are provided.
+| Field                         | Value                                           |
+| ----------------------------- | ----------------------------------------------- |
+| Business name                 | Fufu Studio                                     |
+| Public privacy contact        | `hello@fufu.studio`                             |
+| Privacy policy effective date | July 10, 2026                                   |
+| Contact delivery              | Resend when configured                          |
+| Contact abuse prevention      | Upstash when configured                         |
+| Hosting and performance       | Vercel, Vercel Analytics, Vercel Speed Insights |
+| Optional analytics            | Google Analytics when configured                |
+| CMS                           | Sanity stores public website content            |
+
+## Environment Notes
+
+- Web and Studio Sanity settings identify the same project and dataset.
+- Studio receives its own deployment origin through environment configuration.
+- Secrets remain in local or deployment environment files and are never copied
+  into this brief.

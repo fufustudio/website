@@ -56,11 +56,31 @@ vi.mock("@vercel/analytics", () => ({
   track: vi.fn(),
 }));
 
-import { CardGridSection } from "@/components/sections/card-grid-section";
+import { CardGridSection } from "@/components/layout/card-grid-section";
 import { FormField } from "@/components/ui/form-field";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { Heading } from "@/components/ui/heading";
 import { ImageFrame } from "@/components/ui/image-frame";
 
 describe("component API polish", () => {
+  it("keeps heading semantics independent from visual size", () => {
+    const html = renderToStaticMarkup(
+      <>
+        <Eyebrow as="span" family="mono" tone="light">
+          Section label
+        </Eyebrow>
+        <Heading as="h3" size="module" tone="inherit">
+          Module title
+        </Heading>
+      </>,
+    );
+
+    expect(html).toContain("<span");
+    expect(html).toContain("Section label</span>");
+    expect(html).toContain("<h3");
+    expect(html).toContain("Module title</h3>");
+  });
+
   it("renders card grid links with shared link behavior", () => {
     const html = renderToStaticMarkup(
       <CardGridSection
@@ -68,7 +88,7 @@ describe("component API polish", () => {
         items={[
           {
             title: "Typed object route",
-            href: { pathname: "/" },
+            href: { pathname: "/sample" },
           },
           {
             title: "External tracked route",
@@ -82,7 +102,7 @@ describe("component API polish", () => {
       />,
     );
 
-    expect(html).toContain('href="/"');
+    expect(html).toContain('href="/sample"');
     expect(html).toContain("Learn more");
     expect(html).toContain('href="https://example.com"');
     expect(html).toContain('target="_blank"');

@@ -23,7 +23,8 @@ const lintExtensions = new Set([".cjs", ".js", ".jsx", ".mjs", ".ts", ".tsx"]);
 const ignoredFiles = new Set([
   "package-lock.json",
   "sanity.types.ts",
-  "schema.json",
+  "studio/package-lock.json",
+  "studio/schema.json",
 ]);
 
 function readStdin() {

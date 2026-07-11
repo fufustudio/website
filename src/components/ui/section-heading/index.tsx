@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { Heading, type HeadingLevel } from "@/components/ui/heading";
+import { cn } from "@/config/cn";
 import styles from "./styles.module.css";
 
 const alignments = {
@@ -18,10 +21,6 @@ const gaps = {
   spacious: styles.gapSpacious,
 } as const;
 
-function classNames(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export function SectionHeading({
   eyebrow,
   heading,
@@ -29,7 +28,7 @@ export function SectionHeading({
   align = "center",
   width = "md",
   gap = "default",
-  headingAs: Heading = "h2",
+  headingAs = "h2",
   headingClassName,
   introClassName,
   className,
@@ -40,14 +39,14 @@ export function SectionHeading({
   align?: keyof typeof alignments;
   width?: keyof typeof widths;
   gap?: keyof typeof gaps;
-  headingAs?: "h1" | "h2" | "h3";
+  headingAs?: HeadingLevel;
   headingClassName?: string;
   introClassName?: string;
   className?: string;
 }) {
   return (
     <div
-      className={classNames(
+      className={cn(
         styles.root,
         alignments[align],
         widths[width],
@@ -55,9 +54,10 @@ export function SectionHeading({
         className,
       )}
     >
-      {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
+      {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
       <Heading
-        className={classNames(
+        as={headingAs}
+        className={cn(
           eyebrow ? styles.headingAfterEyebrow : undefined,
           headingClassName,
         )}
@@ -65,7 +65,7 @@ export function SectionHeading({
         {heading}
       </Heading>
       {intro ? (
-        <p className={classNames(styles.intro, introClassName)}>{intro}</p>
+        <p className={cn(styles.intro, introClassName)}>{intro}</p>
       ) : null}
     </div>
   );
