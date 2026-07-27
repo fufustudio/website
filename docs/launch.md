@@ -11,25 +11,29 @@
 
 ## Vercel Environment Variables
 
-| Variable                         | Required                        | Example                       | Notes                                               |
-| -------------------------------- | ------------------------------- | ----------------------------- | --------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`           | Yes                             | `https://www.example.com`     | Used for metadata, canonicals, sitemap, and robots. |
-| `NEXT_PUBLIC_SANITY_PROJECT_ID`  | For live CMS                    | `your-project-id`             | Leave unset only for starter/local fallback work.   |
-| `NEXT_PUBLIC_SANITY_DATASET`     | For live CMS                    | `production`                  | Match the Sanity dataset.                           |
-| `NEXT_PUBLIC_SANITY_API_VERSION` | For live CMS                    | `2026-06-24`                  | Keep pinned per project.                            |
-| `NEXT_PUBLIC_SANITY_STUDIO_URL`  | For visual editing              | `https://site.sanity.studio`  | Trusted Studio origin; no path.                     |
-| `SANITY_ALLOW_CONFIG_MISMATCH`   | Rarely                          | `false`                       | Opt out only when web and Studio differ by design.  |
-| `SANITY_API_READ_TOKEN`          | For visual editing              | Viewer token                  | Server-only; enables authenticated draft preview.   |
-| `SANITY_REVALIDATE_SECRET`       | Optional                        | generated secret              | Add only when webhooks revalidate content.          |
-| `RESEND_API_KEY`                 | For production message delivery | `re_...`                      | Server-only.                                        |
-| `RESEND_FROM_EMAIL`              | For production message delivery | `Website <hello@example.com>` | Must use a verified sending domain.                 |
-| `RESEND_TO_EMAIL`                | For production message delivery | `contact@example.com`         | Recipient inbox for inquiries.                      |
-| `UPSTASH_REDIS_REST_URL`         | For production contact form     | provider URL                  | Server-only shared rate-limit store.                |
-| `UPSTASH_REDIS_REST_TOKEN`       | For production contact form     | provider token                | Server-only shared rate-limit credential.           |
-| `KV_REST_API_URL`                | Alternative rate-limit store    | provider URL                  | Injected by Vercel Marketplace Upstash integration. |
-| `KV_REST_API_TOKEN`              | Alternative rate-limit token    | provider token                | Injected by Vercel Marketplace Upstash integration. |
-| `GOOGLE_SITE_VERIFICATION`       | Optional                        | token                         | Search Console verification.                        |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID`  | Optional                        | `G-XXXXXXXXXX`                | GA4 Measurement ID only; do not paste the script.   |
+| Variable                               | Required                        | Example                       | Notes                                               |
+| -------------------------------------- | ------------------------------- | ----------------------------- | --------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`                 | Yes                             | `https://www.example.com`     | Used for metadata, canonicals, sitemap, and robots. |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID`        | For live CMS                    | `your-project-id`             | Leave unset only for starter/local fallback work.   |
+| `NEXT_PUBLIC_SANITY_DATASET`           | For live CMS                    | `production`                  | Match the Sanity dataset.                           |
+| `NEXT_PUBLIC_SANITY_API_VERSION`       | For live CMS                    | `2026-06-24`                  | Keep pinned per project.                            |
+| `NEXT_PUBLIC_SANITY_STUDIO_URL`        | For visual editing              | `https://site.sanity.studio`  | Trusted Studio origin; no path.                     |
+| `SANITY_ALLOW_CONFIG_MISMATCH`         | Rarely                          | `false`                       | Opt out only when web and Studio differ by design.  |
+| `SANITY_API_READ_TOKEN`                | For visual editing              | Viewer token                  | Server-only; enables authenticated draft preview.   |
+| `SANITY_REVALIDATE_SECRET`             | Optional                        | generated secret              | Add only when webhooks revalidate content.          |
+| `RESEND_API_KEY`                       | For production message delivery | `re_...`                      | Server-only.                                        |
+| `RESEND_FROM_EMAIL`                    | For production message delivery | `Website <hello@example.com>` | Must use a verified sending domain.                 |
+| `RESEND_TO_EMAIL`                      | For production message delivery | `contact@example.com`         | Recipient inbox for inquiries.                      |
+| `ATTIO_ACCESS_TOKEN`                   | When Attio CRM capture is used  | workspace access token        | Server-only; use only the documented scopes.        |
+| `ATTIO_INBOUND_LIST_ID`                | When Attio CRM capture is used  | list UUID or API slug         | Configure together with the Attio token.            |
+| `UPSTASH_REDIS_REST_URL`               | For production contact form     | provider URL                  | Server-only shared rate-limit store.                |
+| `UPSTASH_REDIS_REST_TOKEN`             | For production contact form     | provider token                | Server-only shared rate-limit credential.           |
+| `KV_REST_API_URL`                      | Alternative rate-limit store    | provider URL                  | Injected by Vercel Marketplace Upstash integration. |
+| `KV_REST_API_TOKEN`                    | Alternative rate-limit token    | provider token                | Injected by Vercel Marketplace Upstash integration. |
+| `GOOGLE_SITE_VERIFICATION`             | Optional                        | token                         | Search Console verification.                        |
+| `NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED` | Optional                        | `true` or `false`             | Controls Vercel pageviews and canonical events.     |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID`        | Optional                        | `G-XXXXXXXXXX`                | GA4 Measurement ID only; do not paste the script.   |
+| `NEXT_PUBLIC_GA_CONSENT_MODE`          | Optional                        | `basic` or `immediate`        | Google loading policy; defaults to `basic`.         |
 
 Redeploy after adding or changing any Vercel env var.
 
@@ -59,8 +63,14 @@ and both origins when any preview setting is present.
   published content.
 - Confirm forms, analytics, metadata, and responsive layouts.
 - Confirm Google Analytics appears in Tag Assistant only when
-  `NEXT_PUBLIC_GA_MEASUREMENT_ID` is configured.
+  `NEXT_PUBLIC_GA_MEASUREMENT_ID` is configured and, in the default `basic`
+  mode, only after **Allow analytics** is selected.
+- Confirm decline persists across navigation and reload, withdrawal removes the
+  Google script after reload, the footer preference is keyboard accessible, and
+  Vercel Analytics remains mounted only when its enable flag is not `false`.
 - Confirm Resend has a verified sending domain when contact delivery is enabled.
+- When Attio capture is enabled, confirm a test form submission appears once in
+  the configured list with its message note and `New` status.
 - Confirm the Upstash limiter is configured and returns `429` after the contact
   request budget is exhausted.
 - Confirm `/privacy` has the client legal/business name, public contact email,

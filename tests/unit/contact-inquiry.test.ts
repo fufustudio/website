@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   inquiryFieldLimits,
+  normalizeInquirySubmissionId,
   validateInquiry,
   validateInquiryDetails,
   type ContactInquiry,
@@ -55,5 +56,13 @@ describe("contact inquiry validation", () => {
         message: "x".repeat(inquiryFieldLimits.message + 1),
       }),
     ).toBe("Please shorten your message and try again.");
+  });
+
+  it("accepts UUID submission IDs and rejects untrusted correlation values", () => {
+    expect(
+      normalizeInquirySubmissionId(" 123E4567-E89B-42D3-A456-426614174000 "),
+    ).toBe("123e4567-e89b-42d3-a456-426614174000");
+    expect(normalizeInquirySubmissionId("contact/ada@example.com")).toBeNull();
+    expect(normalizeInquirySubmissionId(null)).toBeNull();
   });
 });

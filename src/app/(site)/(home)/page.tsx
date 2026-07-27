@@ -6,7 +6,7 @@ import type { HomePageContent } from "@/data/home-page";
 import { pageMetadata } from "@/config/seo";
 import { home } from "@/content/home";
 import { getDynamicFetchOptions } from "@/sanity/lib/live";
-import { HomePage } from "./components/home-page";
+import { HomePage } from "@/page-modules/home";
 
 const fallbackContent: HomePageContent = {
   title: home.heading,

@@ -19,7 +19,18 @@ Without Sanity credentials it uses the local Fufu content baseline. Once
 Sanity is configured, `siteSettings` and the `home` page become required and
 CMS failures surface instead of silently publishing fallback content. The
 homepage remains deliberately sparse until the redesign is ready, while its
-contact form retains Resend delivery and shared Upstash rate limiting.
+contact form retains Resend delivery and shared Upstash rate limiting. Contact
+submissions flow through a provider-neutral inquiry processor with retry-safe
+correlation IDs. When Attio is configured, the form upserts the person, updates
+the `Inbound leads` list, and stores the full inquiry as a note; Resend remains
+the notification layer.
+
+Vercel Analytics is enabled by default and canonical business events are
+dispatched through `src/analytics`. Optional GA4 uses
+`NEXT_PUBLIC_GA_MEASUREMENT_ID`; `NEXT_PUBLIC_GA_CONSENT_MODE=basic` blocks
+Google until the visitor opts in. See
+[docs/forms-analytics.md](./docs/forms-analytics.md) for configuration,
+consent, event, and Attio operating guidance.
 
 Sanity Studio is a separate application in `studio/`. Install and run the two
 apps independently. Its Presentation tool can load the Next.js site with live
@@ -37,7 +48,7 @@ npm run studio:dev
 
 The website uses native CSS and colocated CSS Modules; Tailwind is not part of
 the baseline. Shared design decisions live as semantic custom properties in
-`src/app/(site)/globals.css`, while component modules own local structure and
+`src/styles/globals.css`, while component and page modules own local structure and
 states. Use the low-level `Heading` and `Eyebrow` primitives for shared heading
 and label treatments.
 
@@ -58,3 +69,5 @@ npm run verify:template
 
 Use `npm run verify:handoff` for client-site handoff after production env vars
 and client fallback content are configured.
+
+Use `npm run test:e2e:analytics` for the dedicated GA4 consent browser suite.

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import { ErrorContent } from "@/components/layout/error-content";
 import { fontVariables } from "@/config/fonts";
-import "./(site)/globals.css";
+import { ErrorPage } from "@/page-modules/error";
+import "@/styles/globals.css";
 
 export default function GlobalError({
   error,
@@ -12,15 +11,11 @@ export default function GlobalError({
   error: Error & { digest?: string };
   unstable_retry: () => void;
 }) {
-  useEffect(() => {
-    console.error("[global] Unhandled application error", error);
-  }, [error]);
-
   return (
     <html lang="en" className={fontVariables}>
       <body>
         <main>
-          <ErrorContent retry={unstable_retry} />
+          <ErrorPage error={error} retry={unstable_retry} scope="global" />
         </main>
       </body>
     </html>

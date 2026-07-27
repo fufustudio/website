@@ -4,7 +4,7 @@ import { getPrivacyContent } from "@/content/privacy";
 import { site } from "@/content/site";
 import { getCleanSiteSettings } from "@/data/site-settings";
 import { pageMetadata } from "@/config/seo";
-import PrivacyPage from "./components/privacy-page";
+import { PrivacyPage } from "@/page-modules/privacy";
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteSettings = await getCleanSiteSettings();

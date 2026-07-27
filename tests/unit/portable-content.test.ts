@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   isExternalPortableTextHref,
   portableTextHref,
-} from "@/components/ui/portable-content";
+} from "@/components/portable-content";
 
 describe("portableTextHref", () => {
   it("allows expected public and relative link targets", () => {

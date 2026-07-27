@@ -20,6 +20,7 @@ vi.mock("resend", () => ({
 import { POST } from "@/app/api/contact/route";
 
 const validPayload = {
+  submissionId: "123e4567-e89b-42d3-a456-426614174000",
   name: "Ada Lovelace",
   email: "ada@example.com",
   interest: "Strategy",
@@ -29,8 +30,11 @@ const validPayload = {
 describe("POST /api/contact", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     ResendMock.mockClear();
     sendMock.mockReset();
+    delete process.env.ATTIO_ACCESS_TOKEN;
+    delete process.env.ATTIO_INBOUND_LIST_ID;
     delete process.env.RESEND_API_KEY;
     delete process.env.RESEND_FROM_EMAIL;
     delete process.env.RESEND_TO_EMAIL;
@@ -159,7 +163,36 @@ describe("POST /api/contact", () => {
         text: expect.stringContaining("Interest: Strategy"),
         html: expect.stringContaining("New website contact."),
       }),
+      {
+        idempotencyKey: "contact-inquiry/123e4567-e89b-42d3-a456-426614174000",
+      },
     );
+  });
+
+  it("returns success after Attio capture when Resend notification is unavailable", async () => {
+    process.env.ATTIO_ACCESS_TOKEN = "attio-token";
+    process.env.ATTIO_INBOUND_LIST_ID = "inbound-list";
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({ data: { id: { record_id: "person-id" } } }),
+      )
+      .mockResolvedValueOnce(Response.json({ data: [] }))
+      .mockResolvedValueOnce(
+        Response.json({ data: { id: { entry_id: "entry-id" } } }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({ data: { id: { note_id: "note-id" } } }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await POST(jsonRequest(validPayload));
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({ success: true });
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(sendMock).not.toHaveBeenCalled();
   });
 
   it("returns a safe error when Resend fails", async () => {

@@ -1,4 +1,5 @@
 export type ContactInquiryPayload = {
+  submissionId?: unknown;
   name?: unknown;
   email?: unknown;
   interest?: unknown;
@@ -30,6 +31,9 @@ export const inquiryErrors = {
   length: "Please shorten your message and try again.",
 } as const;
 
+const submissionIdPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export function isContactInquiryPayload(
   value: unknown,
 ): value is ContactInquiryPayload {
@@ -54,6 +58,15 @@ export function normalizeInquiry(
     interest: normalizeField(payload.interest),
     message: normalizeField(payload.message),
   };
+}
+
+export function normalizeInquirySubmissionId(value: unknown) {
+  if (typeof value !== "string") return null;
+
+  const submissionId = value.trim();
+  return submissionIdPattern.test(submissionId)
+    ? submissionId.toLowerCase()
+    : null;
 }
 
 export function validateInquiry(inquiry: ContactInquiry) {

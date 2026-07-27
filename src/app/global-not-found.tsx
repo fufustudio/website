@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { NotFoundContent } from "@/components/layout/not-found-content";
 import { fontVariables } from "@/config/fonts";
-import "./(site)/globals.css";
+import { NotFoundPage } from "@/page-modules/not-found";
+import "@/styles/globals.css";
 
 export const metadata: Metadata = {
   title: "Page not found",
@@ -13,7 +13,7 @@ export default function GlobalNotFound() {
     <html lang="en" className={fontVariables}>
       <body>
         <main>
-          <NotFoundContent />
+          <NotFoundPage />
         </main>
       </body>
     </html>

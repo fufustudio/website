@@ -10,7 +10,7 @@
 
 | Area         | Item                              | Status   | Notes                                                         |
 | ------------ | --------------------------------- | -------- | ------------------------------------------------------------- |
-| Structure    | Current starter web architecture  | complete | Root Next.js app with route-local page composition            |
+| Structure    | Current starter web architecture  | complete | Thin App Router with top-level page modules and components    |
 | Studio       | Standalone top-level Sanity app   | complete | Independent package, env, build, and deploy                   |
 | Homepage     | Hero, flexible body, contact      | complete | Minimal interim Fufu content only                             |
 | Components   | Generic UI and layout recipes     | complete | Reusable primitives and section recipes preserved             |

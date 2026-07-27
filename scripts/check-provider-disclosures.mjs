@@ -10,13 +10,18 @@ function read(root, path) {
 
 export function validateProviderDisclosures({
   dependencies,
+  implementationText = "",
   publicDisclosureText,
   setupDocumentationText,
 }) {
   const failures = [];
 
   for (const provider of providerRegistry) {
-    const active = provider.dependencyNames.some((name) => dependencies[name]);
+    const active =
+      provider.dependencyNames.some((name) => dependencies[name]) ||
+      provider.implementationText?.some((text) =>
+        implementationText.includes(text),
+      );
     if (!active) continue;
 
     for (const required of provider.publicDisclosureText) {
@@ -45,6 +50,11 @@ export function checkProviderDisclosures(root = process.cwd()) {
     ...packageJson.dependencies,
     ...packageJson.devDependencies,
   };
+  const implementationText = providerRegistry
+    .flatMap((provider) => provider.implementationPaths ?? [])
+    .filter((path) => exists(root, path))
+    .map((path) => read(root, path))
+    .join("\n");
   const publicDisclosureText = read(root, "src/content/privacy.ts");
   const setupDocumentationText = [
     read(root, ".env.example"),
@@ -56,9 +66,19 @@ export function checkProviderDisclosures(root = process.cwd()) {
 
   return validateProviderDisclosures({
     dependencies,
+    implementationText,
     publicDisclosureText,
     setupDocumentationText,
   });
+}
+
+function exists(root, path) {
+  try {
+    read(root, path);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function main() {

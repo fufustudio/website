@@ -1,7 +1,7 @@
 # Component Registry
 
 Use this registry when deciding whether a design should use UI primitives,
-section recipes, route-local code, or new shared components. Prefer existing
+section recipes, page-module code, or new shared components. Prefer existing
 patterns before creating new shared UI.
 
 Selection order:
@@ -17,7 +17,7 @@ Selection order:
 - `Container` owns gutters and max width.
 - `site-grid` and `grid-*` helpers own cross-page alignment.
 - Section recipes expose `className`, `containerClassName`, and `sectionSize`
-  for project composition only. Prefer route-local CSS for one-off visual
+  for project composition only. Prefer page-module CSS for one-off visual
   deviations instead of growing recipe props.
 - Page-specific CSS Modules own unusual composition that appears on one route.
 - Add a new layout component only when the same structure appears on multiple
@@ -93,10 +93,10 @@ CVA, or a styled UI kit.
 - Use `src/sanity` for the shared web Sanity client, live integration, and
   generated-type bridge. Keep site GROQ queries in `src/data/queries`.
 - Use `studio` for schemas, authoring structure, and Studio-specific scripts.
-- Use `src/components/layout` for reusable page-section layouts,
-  shared site chrome, and root-mounted analytics.
-- Keep page composition and one-route behavior in that route's `components`
-  folder. Introduce `features` only for substantial behavior shared across routes.
+- Use the flat `src/components` catalog for reusable page-section layouts,
+  shared site chrome, controls, and root-mounted analytics.
+- Keep page composition in `src/page-modules`; route files only load data and
+  handle Next.js routing and metadata concerns.
 - Use `src/components/navigation.ts` for site navigation; `src/config` owns
   runtime-wide configuration consumed by pages, APIs, and metadata.
 - Keep one-off page copy in a route only when it will not be reused or edited in
@@ -111,7 +111,7 @@ Create a new shared component when:
 - a component makes a data boundary clearer.
 - the component belongs to the starter as a reusable implementation pattern.
 
-Keep code route-local when:
+Keep code in a page module when:
 
 - the layout appears once.
 - the styling depends heavily on a single page composition.

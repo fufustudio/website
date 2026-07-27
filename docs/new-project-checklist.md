@@ -27,7 +27,7 @@ Use this when creating a project from `fufustudio/fufu-starter`.
 - Replace starter fallback content, upload reusable/editable content and media
   to Sanity, then remove project-specific local fallback images once the live
   dataset is seeded.
-- Add real brand tokens in `src/app/(site)/globals.css` and mirror core values in
+- Add real brand tokens in `src/styles/globals.css` and mirror core values in
   `src/config/theme.ts`.
 - Add favicon and real visual assets only when the project needs them.
 
@@ -78,6 +78,13 @@ Use this when creating a project from `fufustudio/fufu-starter`.
 ## Optional Forms And Analytics
 
 - Choose the form provider or replace the starter handler.
+- Decide whether the inquiry inbox or a CRM is the durable lead system of
+  record. If adding a CRM, extend `processInquiry` with a server-only
+  destination and follow the capture-versus-notification contract in
+  `docs/forms-analytics.md`.
+- For the built-in Attio destination, add `ATTIO_ACCESS_TOKEN` and
+  `ATTIO_INBOUND_LIST_ID` together and configure the list fields documented in
+  `docs/forms-analytics.md`.
 - For Resend contact delivery, add `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and
   `RESEND_TO_EMAIL` as server-only environment variables.
 - Add either `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`, or
@@ -87,10 +94,19 @@ Use this when creating a project from `fufustudio/fufu-starter`.
 - For Google Analytics 4, add `NEXT_PUBLIC_GA_MEASUREMENT_ID` with only the
   `G-...` Measurement ID. Do not paste Google's full `<script>` snippet into
   the app.
-- Confirm the privacy policy and cookie consent requirements before enabling
-  Google Analytics.
+- Keep `NEXT_PUBLIC_GA_CONSENT_MODE=basic` unless a launch-specific privacy
+  review documents why immediate loading is appropriate.
+- Verify no Google script or request occurs before acceptance, decline persists
+  across navigation and reload, withdrawal removes Google after reload, and
+  the footer preference control is keyboard accessible.
+- Set `NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED=false` when Vercel Analytics should
+  not collect automatic pageviews or canonical custom events.
 - Confirm `inquiry_submitted` tracks only after a real successful submission.
-- Add or rename analytics events near the component that fires them.
+- Confirm inquiry submission IDs deduplicate safe retries without entering
+  analytics, URLs, or visitor-facing copy.
+- Add or rename canonical analytics events in `AnalyticsEventMap`, project them
+  explicitly in each destination adapter, and fire them near the component that
+  owns the interaction.
 - Reflect every provider that touches visitor data in `/privacy`, including
   email, CMS lead storage, CRM, newsletter, ads, chat, heatmaps, CAPTCHA, or
   cookie tools.

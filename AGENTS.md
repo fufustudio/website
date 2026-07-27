@@ -79,19 +79,17 @@ Use Node.js 22 and npm 10, matching `package.json`, `.node-version`, and CI.
 
 ## Project Rules
 
-- Pages compose content, data helpers, and reusable components. They should stay thin.
+- `src/app` owns only Next.js route concerns: route files, layouts, metadata,
+  redirects, and route-level data loading. Route files should stay thin.
+- Rendered page and layout composition lives in `src/page-modules`. Page modules
+  receive normalized data from routes and compose reusable components.
 - Every reusable React component lives in its own kebab-case folder, such as
-  `src/components/ui/button/index.tsx`, with a colocated `styles.module.css` when
-  local styles are needed. Shared non-React type modules may stay at the category level.
-- Route-local implementation under `src/app` may use plain `components` and
-  `lib` folders; without a `page` or `route` file they do not expose a URL.
-- `src/components/ui` owns low-level primitives. The sibling
-  `layout` folder owns reusable page-section layouts and shared site chrome.
-  Page-specific composition starts in the route's own `components` folder and
-  moves upward only after another route needs it.
-- Route-local React components follow the same colocation rule: each component
-  uses a kebab-case folder with `index.tsx` and an optional `styles.module.css`.
-  Reserve a `features` layer for substantial behavior shared across routes.
+  `src/components/button/index.tsx`, with a colocated `styles.module.css` when
+  local styles are needed. Keep `src/components` flat rather than grouping
+  components into `ui`, `layout`, or route-local subtrees. Shared non-React type
+  modules may stay directly in `src/components`.
+- Server-only route implementation belongs in an explicit top-level boundary
+  such as `src/server`, not in helper folders under `src/app`.
 - `src/data` owns site-only data access, GROQ queries,
   generated-query result normalization, and local fallback selection.
   `src/sanity` owns shared web integration infrastructure; `studio` owns schemas
@@ -130,9 +128,9 @@ Use `defineType`, `defineField`, and `defineArrayMember`. Let Sanity generate ID
 ## Forms And Analytics
 
 The contact form lives beside the homepage in
-`src/app/(site)/(home)/components/contact-form/`; its browser-safe request
+`src/components/contact-form/`; its browser-safe request
 contract lives in `src/contracts/contact.ts`, while server-only delivery behavior
-lives with `src/app/api/contact/`.
+lives in `src/server/contact/`. The App Router owns only the HTTP route.
 The client form validates name, email, and message fields, validates email shape,
 includes honeypots, submits through the Resend route when configured, and tracks
 successful human submissions with `inquiry_submitted`.

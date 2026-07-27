@@ -1,5 +1,5 @@
 import type { SiteSettings } from "@/data/site-settings";
-import { publicEnv } from "@/config/env";
+import { analyticsConfig } from "@/analytics/config";
 
 type PrivacySection = {
   title: string;
@@ -22,12 +22,13 @@ export type PrivacyContent = {
 export function getPrivacyContent(siteSettings: SiteSettings): PrivacyContent {
   const businessName = siteSettings.name;
   const contactEmail = siteSettings.email || "hello@fufu.studio";
-  const hasGoogleAnalytics = Boolean(publicEnv.googleAnalyticsMeasurementId);
+  const hasGoogleAnalytics = analyticsConfig.ga4.enabled;
   const providers = [
     "Vercel",
-    "Vercel Analytics",
+    ...(analyticsConfig.vercel.enabled ? ["Vercel Analytics"] : []),
     "Vercel Speed Insights",
     ...(hasGoogleAnalytics ? ["Google Analytics"] : []),
+    "Attio, when CRM capture is configured",
     "Resend, when contact form delivery is configured",
     "Upstash, for contact-form abuse prevention",
     "Google Workspace or your email provider",
@@ -35,7 +36,7 @@ export function getPrivacyContent(siteSettings: SiteSettings): PrivacyContent {
   ];
 
   return {
-    effectiveDate: "July 10, 2026",
+    effectiveDate: "July 26, 2026",
     businessName,
     contactEmail,
     hasGoogleAnalytics,
@@ -64,10 +65,17 @@ export function getPrivacyContent(siteSettings: SiteSettings): PrivacyContent {
       {
         title: "Analytics And Cookies",
         body: [
-          "This website may use Vercel Analytics and Vercel Speed Insights to understand site usage and performance.",
+          ...(analyticsConfig.vercel.enabled
+            ? [
+                "This website uses Vercel Analytics for cookieless, aggregate site measurement. This measurement remains active when optional Google Analytics is declined.",
+              ]
+            : []),
+          "This website uses Vercel Speed Insights to understand aggregate site performance.",
           ...(hasGoogleAnalytics
             ? [
-                "This website is configured to use Google Analytics. Google may receive information about visitor interactions with this site and may process that information according to its own policies and settings.",
+                analyticsConfig.ga4.consentMode === "basic"
+                  ? "Google Analytics is optional and does not load or receive site interactions until a visitor selects Allow analytics. Visitors can change or withdraw that preference through the Analytics preferences control in the footer."
+                  : "Google Analytics is configured to load immediately after a privacy review. Google may receive information about visitor interactions with this site and may process it according to its own policies and settings.",
               ]
             : []),
         ],
@@ -87,7 +95,7 @@ export function getPrivacyContent(siteSettings: SiteSettings): PrivacyContent {
       {
         title: "Contact Form And Email",
         body: [
-          "When a visitor submits the contact form, we use the submitted details to respond to the inquiry. If Resend is configured, the site sends the inquiry through the server-side contact route to the configured recipient inbox.",
+          "When a visitor submits the contact form, we use the submitted details to respond to the inquiry. If Attio is configured, the site creates or updates a CRM contact, adds the contact to an inbound-leads list, and stores the message as a note. If Resend is configured, the site also sends a notification to the configured recipient inbox.",
           "The contact route uses Upstash to enforce a shared request limit. It sends a one-way hash of the visitor's network address as the limiter key rather than storing the address in plain text.",
           "Treat submitted messages as untrusted visitor-provided text in inboxes, CRMs, automations, and dashboards.",
         ],
@@ -120,6 +128,11 @@ export function getPrivacyContent(siteSettings: SiteSettings): PrivacyContent {
         title: "Your Choices",
         body: [
           `Visitors may contact ${contactEmail} to ask about their submitted information.`,
+          ...(hasGoogleAnalytics && analyticsConfig.ga4.consentMode === "basic"
+            ? [
+                "Visitors can allow, decline, or withdraw optional Google Analytics through the Analytics preferences control in the footer.",
+              ]
+            : []),
           "Visitors can also use browser settings or privacy tools to limit cookies or tracking, though some site features may not work as intended.",
         ],
       },

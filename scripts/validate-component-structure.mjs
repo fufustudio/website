@@ -2,8 +2,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, dirname, join, relative } from "node:path";
 
 const appRoot = join(process.cwd(), "src/app");
-const siteRoot = join(appRoot, "(site)");
 const sharedComponentsRoot = join(process.cwd(), "src/components");
+const pageModulesRoot = join(process.cwd(), "src/page-modules");
 
 function walk(dir) {
   const files = [];
@@ -18,19 +18,6 @@ function walk(dir) {
 }
 
 const errors = [];
-
-function findImplementationRoots(root) {
-  if (!existsSync(root)) return [];
-
-  const roots = [];
-  for (const entry of readdirSync(root)) {
-    const path = join(root, entry);
-    if (!statSync(path).isDirectory()) continue;
-    if (entry === "components" || entry === "features") roots.push(path);
-    roots.push(...findImplementationRoots(path));
-  }
-  return roots;
-}
 
 function validateReactFolders(root) {
   if (!existsSync(root)) return;
@@ -66,11 +53,50 @@ function validateReactFolders(root) {
   }
 }
 
-const implementationRoots = findImplementationRoots(siteRoot);
-implementationRoots.push(sharedComponentsRoot);
-for (const root of implementationRoots) validateReactFolders(root);
+for (const root of [sharedComponentsRoot, pageModulesRoot]) {
+  validateReactFolders(root);
+}
 
-for (const root of [appRoot, sharedComponentsRoot]) {
+const forbiddenAppDirectories = new Set([
+  "components",
+  "features",
+  "lib",
+  "page-modules",
+]);
+const nextAppFilePattern =
+  /^(?:page|layout|template|loading|error|not-found|default|route|global-error|global-not-found|robots|sitemap|manifest|favicon|icon|apple-icon|opengraph-image|twitter-image)(?:\.[^.]+)+$/;
+
+for (const file of walk(appRoot)) {
+  const projectPath = relative(process.cwd(), file);
+  const segments = projectPath.split("/");
+
+  if (segments.some((segment) => forbiddenAppDirectories.has(segment))) {
+    errors.push(
+      `${projectPath} is implementation code inside src/app; move it to src/components, src/page-modules, or another top-level source boundary.`,
+    );
+  }
+
+  if (!nextAppFilePattern.test(basename(file))) {
+    errors.push(
+      `${projectPath} is not a Next.js route or file-convention entry; src/app is reserved for routing.`,
+    );
+  }
+}
+
+for (const entry of readdirSync(sharedComponentsRoot)) {
+  const path = join(sharedComponentsRoot, entry);
+  if (!statSync(path).isDirectory()) continue;
+
+  for (const child of readdirSync(path)) {
+    if (statSync(join(path, child)).isDirectory()) {
+      errors.push(
+        `${relative(process.cwd(), join(path, child))} makes the component catalog nested; src/components must stay flat.`,
+      );
+    }
+  }
+}
+
+for (const root of [appRoot, sharedComponentsRoot, pageModulesRoot]) {
   if (!existsSync(root)) continue;
 
   for (const file of walk(root)) {
@@ -85,7 +111,7 @@ for (const root of [appRoot, sharedComponentsRoot]) {
   }
 }
 
-for (const root of [siteRoot, sharedComponentsRoot]) {
+for (const root of [appRoot, sharedComponentsRoot, pageModulesRoot]) {
   if (!existsSync(root)) continue;
 
   for (const file of walk(root)) {
@@ -113,4 +139,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log("Shared and route-local component structure check passed.");
+console.log("Route, flat component, and page-module structure check passed.");

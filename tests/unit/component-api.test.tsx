@@ -52,15 +52,15 @@ vi.mock("next/image", () => ({
   ),
 }));
 
-vi.mock("@vercel/analytics", () => ({
-  track: vi.fn(),
+vi.mock("@/analytics/track-event", () => ({
+  trackAnalyticsEvent: vi.fn(),
 }));
 
-import { CardGridSection } from "@/components/layout/card-grid-section";
-import { FormField } from "@/components/ui/form-field";
-import { Eyebrow } from "@/components/ui/eyebrow";
-import { Heading } from "@/components/ui/heading";
-import { ImageFrame } from "@/components/ui/image-frame";
+import { CardGridSection } from "@/components/card-grid-section";
+import { FormField } from "@/components/form-field";
+import { Eyebrow } from "@/components/eyebrow";
+import { Heading } from "@/components/heading";
+import { ImageFrame } from "@/components/image-frame";
 
 describe("component API polish", () => {
   it("keeps heading semantics independent from visual size", () => {
@@ -95,7 +95,13 @@ describe("component API polish", () => {
             href: "https://example.com",
             actionLabel: "Visit",
             external: true,
-            event: "card_click",
+            analytics: {
+              name: "cta_clicked",
+              properties: {
+                cta_id: "external-example",
+                placement: "section",
+              },
+            },
             ariaLabel: "Visit external example",
           },
         ]}

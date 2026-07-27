@@ -14,11 +14,11 @@ UI-library policy.
 
 ## Rules
 
-- Prefer primitives, then section recipes, then route-local CSS, then new shared
+- Prefer primitives, then section recipes, then page-module CSS, then new shared
   components.
 - Keep recipe props semantic: heading, intro, items, actions, image.
 - Keep recipes and CTA groups as Server Components. `TrackedLink` is the small
-  client boundary for optional Vercel Analytics events.
+  client boundary for typed canonical analytics events.
 - Do not add a generic Sanity page-builder schema for these recipes. Model
   client content semantically, then render through the recipes.
 - Do not add Radix, React Aria, CVA, or styled UI kits by
@@ -27,7 +27,7 @@ UI-library policy.
 
 ## Shared Types
 
-Shared recipe types live in `src/components/layout/types.ts`.
+Shared recipe types live in `src/components/pattern-types.ts`.
 
 ```ts
 type PatternHref = LinkProps<string>["href"] | string;
@@ -36,7 +36,7 @@ type PatternAction = {
   label: React.ReactNode;
   href: PatternHref;
   variant?: "primary" | "secondary" | "outline" | "ghost";
-  event?: string;
+  analytics?: AnalyticsEvent;
   external?: boolean;
   ariaLabel?: string;
 };
@@ -60,7 +60,8 @@ type PatternImage = {
 - `Eyebrow` owns compact uppercase labels with sans/mono and tone variants.
 - `Button`, `ButtonLink`, and `buttonClasses()` share the same variants and
   sizes.
-- `ActionGroup` renders section CTAs and tracks `event` values when present.
+- `ActionGroup` renders section CTAs and dispatches typed `analytics` events
+  when present.
   Use `PatternHref` anywhere a reusable component accepts internal typed
   routes, URL objects, hash links, or external URL strings.
 - `TrackedLink` is the low-level client bridge for analytics-tracked links.
@@ -70,26 +71,23 @@ type PatternImage = {
 
 ## Source Taxonomy
 
-- `src/components/ui`: low-level primitives and helpers that are reusable across
-  routes and recipes.
-- `src/components/layout`: reusable page-section layouts composed
-  from UI primitives, plus shared site chrome such as header, footer, and navigation.
-- `src/components/layout/types.ts`: shared layout recipe prop types.
-- Route-local `components`: page compositions that consume recipes and primitives.
+- `src/components`: a flat catalog of low-level primitives, section recipes,
+  behavior, and shared site chrome.
+- `src/components/pattern-types.ts`: shared recipe prop types.
+- `src/page-modules`: page compositions that consume the reusable catalog.
 - `src/app/(site)/**/page.tsx`: public-site URL definitions and thin route adapters.
 
 Every shared React component owns a kebab-case folder, with `index.tsx` and an
 optional colocated `styles.module.css`. For example, `hero-section/index.tsx`
 and `hero-section/styles.module.css` travel together as one component unit.
-Shared category-level type modules such as `layout/types.ts` remain flat.
-Route-local React components use the same `index.tsx` plus `styles.module.css`
-pairing. Start locally and promote a component only when another route needs it.
+Shared type modules remain directly under `src/components`. Page modules use the
+same `index.tsx` plus optional `styles.module.css` pairing.
 
 ## Section Recipes
 
 - All section recipes accept `className?`, `containerClassName?`, and
   `sectionSize?` for project composition. Use these sparingly for layout
-  integration; do not add one-off visual prop variants when route-local CSS
+  integration; do not add one-off visual prop variants when page-module CSS
   would be clearer.
 - `HeroSection`: `eyebrow?`, `heading`, `intro?`, `actions?`, `image?`,
   `layout?: "text" | "split" | "background"`, `tone?`,
@@ -98,7 +96,8 @@ pairing. Start locally and promote a component only when another route needs it.
   `image?`, `imagePosition?: "start" | "end"`, `tone?`.
 - `CardGridSection`: `eyebrow?`, `heading`, `intro?`, `items`,
   `columns?: 2 | 3 | 4`, `tone?`. Items support `title`, `body?`, `href?`,
-  `actionLabel?`, `external?`, `event?`, `ariaLabel?`, `icon?`, and `image?`.
+  `actionLabel?`, `external?`, `analytics?`, `ariaLabel?`, `icon?`, and
+  `image?`.
 - `StepsSection`: `eyebrow?`, `heading`, `intro?`, `items`,
   `layout?: "stack" | "grid"`, `tone?`. Items support `title` and `body?`.
 - `StatsSection`: `eyebrow?`, `heading?`, `intro?`, `items`, `tone?`. Items

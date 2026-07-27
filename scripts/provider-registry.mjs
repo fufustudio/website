@@ -3,7 +3,10 @@ export const providerRegistry = [
     name: "Vercel Analytics",
     dependencyNames: ["@vercel/analytics"],
     publicDisclosureText: ["Vercel Analytics"],
-    setupDocumentationText: ["Vercel Analytics"],
+    setupDocumentationText: [
+      "Vercel Analytics",
+      "NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED",
+    ],
   },
   {
     name: "Vercel Speed Insights",
@@ -15,7 +18,10 @@ export const providerRegistry = [
     name: "Google Analytics",
     dependencyNames: ["@next/third-parties"],
     publicDisclosureText: ["Google Analytics"],
-    setupDocumentationText: ["NEXT_PUBLIC_GA_MEASUREMENT_ID"],
+    setupDocumentationText: [
+      "NEXT_PUBLIC_GA_MEASUREMENT_ID",
+      "NEXT_PUBLIC_GA_CONSENT_MODE",
+    ],
   },
   {
     name: "Resend",
@@ -26,6 +32,14 @@ export const providerRegistry = [
       "RESEND_FROM_EMAIL",
       "RESEND_TO_EMAIL",
     ],
+  },
+  {
+    name: "Attio",
+    dependencyNames: [],
+    implementationPaths: ["src/server/contact/destinations/attio-crm.ts"],
+    implementationText: ["api.attio.com"],
+    publicDisclosureText: ["Attio"],
+    setupDocumentationText: ["ATTIO_ACCESS_TOKEN", "ATTIO_INBOUND_LIST_ID"],
   },
   {
     name: "Upstash",

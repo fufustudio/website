@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-import { ErrorContent } from "@/components/layout/error-content";
+import { ErrorPage } from "@/page-modules/error";
 
 export default function SiteError({
   error,
@@ -10,9 +9,5 @@ export default function SiteError({
   error: Error & { digest?: string };
   unstable_retry: () => void;
 }) {
-  useEffect(() => {
-    console.error("[site] Unhandled route error", error);
-  }, [error]);
-
-  return <ErrorContent retry={unstable_retry} />;
+  return <ErrorPage error={error} retry={unstable_retry} scope="site" />;
 }

@@ -59,9 +59,9 @@ the handoff summary.
   `PageHeader`, `SectionHeading`, `TextLink`, `Button`, `ButtonLink`,
   `ActionGroup`, grid helpers, CSS Modules, and theme tokens.
 - Then map recognizable brochure/content sections to
-  `docs/pattern-library.md` recipes before creating route-local layouts.
+  `docs/pattern-library.md` recipes before creating page-module layouts.
 - Use `docs/component-registry.md` to decide whether a pattern should be shared
-  or route-local.
+  or page-specific.
 - Add a shared component only when multiple surfaces need it or the design
   introduces a clear reusable primitive.
 - Preserve semantic headings, accessibility labels, focus states, alt text, and
@@ -82,7 +82,7 @@ the handoff summary.
 - Record focal points, required alt text, decorative image decisions, and export
   formats in the live build plan.
 - Promote reusable color, typography, and spacing decisions to theme tokens in
-  `src/app/(site)/globals.css`; mirror OpenGraph-critical values in
+  `src/styles/globals.css`; mirror OpenGraph-critical values in
   `src/config/theme.ts`.
 
 ## Implementation Sequence

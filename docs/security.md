@@ -34,17 +34,24 @@ data, adds authenticated features, or connects to business-critical systems.
 - JSON-LD is emitted with `<` escaped before injection.
 - The contact form validates required fields, validates email shape, includes
   honeypot fields, caps field lengths, and only sends through the server-side
-  contact route when Resend is configured. The route applies an Upstash-backed
-  shared rate limit before reading the body and times out slow provider calls.
+  contact route. The route applies an Upstash-backed shared rate limit before
+  reading the body and times out slow provider calls. When Attio is configured,
+  CRM capture is required and Resend becomes a secondary notification.
 - Analytics events are fired near the interaction surfaces that trigger them.
-  Avoid putting personal data, message contents, email addresses, tokens, or
-  customer IDs in analytics event names, paths, or custom properties.
+  The canonical contract and destination allowlists are under `src/analytics`.
+  Avoid putting personal data, message contents, email addresses, tokens,
+  customer IDs, arbitrary URLs, or other user-entered values in analytics event
+  names, paths, or custom properties.
 
 ## Contact Form Abuse
 
 The starter Resend pattern posts from the browser to the same-origin
 `/api/contact` route. Resend credentials must stay server-only:
 `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `RESEND_TO_EMAIL`.
+Attio credentials must also stay server-only: `ATTIO_ACCESS_TOKEN` and
+`ATTIO_INBOUND_LIST_ID`. Use a workspace token limited to Records read-write,
+Object Configuration read, List Entries read-write, List Configuration read,
+and Notes read-write.
 The rate limiter also requires either server-only `UPSTASH_REDIS_REST_URL` and
 `UPSTASH_REDIS_REST_TOKEN` values or Vercel Marketplace's `KV_REST_API_URL`
 and `KV_REST_API_TOKEN` values in production.
@@ -96,16 +103,29 @@ client cannot actually honor operationally.
 ## Cookie And Consent Note
 
 A cookie banner is not automatically required for every small marketing site.
-This starter uses Vercel Analytics and Speed Insights, which are intended to be
-privacy-preserving and do not rely on third-party advertising cookies. It can
-also enable Google Analytics when `NEXT_PUBLIC_GA_MEASUREMENT_ID` is configured.
-Analytics should be disclosed in the privacy policy.
+Vercel Analytics is enabled by default as cookieless aggregate measurement and
+can be removed with `NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED=false`. Speed Insights
+is a separate aggregate performance integration. Both remain outside the
+optional Google preference, and both must be disclosed when used.
+
+Google Analytics is enabled only when `NEXT_PUBLIC_GA_MEASUREMENT_ID` is
+configured. `NEXT_PUBLIC_GA_CONSENT_MODE=basic` is the default: the site queues
+denied Google analytics and advertising consent before other scripts, does not
+mount the Google tag, and does not send GA events until the visitor opts in. The
+choice is versioned in local storage, synchronized across tabs, and can be
+changed through the footer. Withdrawing consent reloads the page after queuing a
+denied update so Google is absent for the remainder of the session.
+
+`NEXT_PUBLIC_GA_CONSENT_MODE=immediate` mounts GA without the preference UI
+while keeping advertising consent denied. Use this escape hatch only after a
+documented, launch-specific privacy review. A cookie banner is not automatically
+required for every small marketing site, but the site's actual providers,
+jurisdictions, claims, and controls determine the requirement.
 
 Revisit cookie consent before launch whenever a project adds:
 
-- Google Analytics or other analytics that set non-essential cookies or local
-  storage. Google Analytics may introduce cookies or similar storage depending
-  on property settings, consent mode, and regional requirements.
+- Analytics or other tools that add non-essential storage beyond this site's
+  reviewed configuration.
 - Ad pixels, retargeting, affiliate tracking, or cross-site profiling.
 - Heatmaps, session replay, chat widgets, embedded media, or social plugins that
   track visitors.

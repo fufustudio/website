@@ -13,6 +13,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   findRuntimePlaceholders,
   loadEnvironment,
+  validateAnalyticsConfiguration,
+  validateAttioConfiguration,
   validateLaunch,
   validateSanityConfiguration,
 } from "../../scripts/check-launch-ready.mjs";
@@ -36,6 +38,38 @@ function temporaryRepo() {
 }
 
 describe("launch verification", () => {
+  it("requires both Attio values when CRM capture is configured", () => {
+    expect(validateAttioConfiguration({})).toEqual([]);
+    expect(
+      validateAttioConfiguration({ ATTIO_ACCESS_TOKEN: "secret-token" }),
+    ).toEqual([expect.stringContaining("ATTIO_INBOUND_LIST_ID")]);
+    expect(
+      validateAttioConfiguration({
+        ATTIO_ACCESS_TOKEN: "secret-token",
+        ATTIO_INBOUND_LIST_ID: "inbound-leads",
+      }),
+    ).toEqual([]);
+  });
+
+  it("accepts supported analytics switches and rejects invalid modes", () => {
+    expect(
+      validateAnalyticsConfiguration({
+        NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED: "false",
+        NEXT_PUBLIC_GA_CONSENT_MODE: "immediate",
+      }),
+    ).toEqual([]);
+
+    expect(
+      validateAnalyticsConfiguration({
+        NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED: "sometimes",
+        NEXT_PUBLIC_GA_CONSENT_MODE: "advanced",
+      }),
+    ).toEqual([
+      'NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED must be "true" or "false".',
+      'NEXT_PUBLIC_GA_CONSENT_MODE must be "basic" or "immediate".',
+    ]);
+  });
+
   it("uses Next production env precedence and variable expansion", () => {
     const root = temporaryRepo();
     writeFileSync(
@@ -52,20 +86,18 @@ describe("launch verification", () => {
 
   it("finds placeholders anywhere in runtime source but ignores docs", () => {
     const root = temporaryRepo();
-    mkdirSync(join(root, "src/app/(site)/example/components/example"), {
+    mkdirSync(join(root, "src/page-modules/example"), {
       recursive: true,
     });
     mkdirSync(join(root, "docs"), { recursive: true });
     writeFileSync(
-      join(root, "src/app/(site)/example/components/example/index.tsx"),
+      join(root, "src/page-modules/example/index.tsx"),
       'export const copy = "Update before launch";',
     );
     writeFileSync(join(root, "docs/fixture.md"), "Fufu Starter");
 
     expect(findRuntimePlaceholders(root)).toEqual([
-      expect.stringContaining(
-        "src/app/(site)/example/components/example/index.tsx",
-      ),
+      expect.stringContaining("src/page-modules/example/index.tsx"),
     ]);
   });
 
@@ -345,6 +377,19 @@ describe("provider disclosure verification", () => {
     expect(failures).toEqual([
       expect.stringContaining("RESEND_FROM_EMAIL"),
       expect.stringContaining("RESEND_TO_EMAIL"),
+    ]);
+  });
+
+  it("detects providers implemented without an SDK dependency", () => {
+    const failures = validateProviderDisclosures({
+      dependencies: {},
+      implementationText: "fetch('https://api.attio.com/v2/notes')",
+      publicDisclosureText: "Attio processes contact-form inquiries.",
+      setupDocumentationText: "ATTIO_ACCESS_TOKEN",
+    });
+
+    expect(failures).toEqual([
+      expect.stringContaining("ATTIO_INBOUND_LIST_ID"),
     ]);
   });
 });

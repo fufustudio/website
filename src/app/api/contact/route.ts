@@ -5,9 +5,10 @@ import {
   normalizeInquiry,
   validateInquiry,
 } from "@/contracts/contact";
-import { checkContactRateLimit } from "./lib/rate-limit";
-import { sendInquiry } from "./lib/send-inquiry";
-import { readJsonBody } from "./lib/read-json-body";
+import { createInquiryContext } from "@/server/contact/inquiry-context";
+import { processInquiry } from "@/server/contact/process-inquiry";
+import { checkContactRateLimit } from "@/server/contact/rate-limit";
+import { readJsonBody } from "@/server/contact/read-json-body";
 
 const deliveryError = "We could not send your message. Please try again later.";
 
@@ -61,16 +62,17 @@ export async function POST(request: Request) {
     return contactResponse(false, validation, 400);
   }
 
-  const delivery = await sendInquiry(inquiry);
+  const context = createInquiryContext(payload.submissionId);
+  const processing = await processInquiry(inquiry, context);
 
-  if (!delivery.success && delivery.reason === "configuration") {
+  if (!processing.success && processing.reason === "configuration") {
     console.error(
-      `[contact] Missing provider configuration: ${delivery.missingEnvVars.join(", ")}`,
+      `[contact] Missing provider configuration: ${processing.missingEnvVars.join(", ")}`,
     );
     return contactResponse(false, deliveryError, 503);
   }
 
-  if (!delivery.success) {
+  if (!processing.success) {
     return contactResponse(false, deliveryError, 502);
   }
 

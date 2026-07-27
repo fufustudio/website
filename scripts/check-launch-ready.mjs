@@ -230,6 +230,52 @@ export function findRuntimePlaceholders(root) {
   return failures;
 }
 
+export function validateAnalyticsConfiguration(webEnv) {
+  const failures = [];
+  const vercelEnabled = trimmed(
+    webEnv,
+    "NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED",
+  )?.toLowerCase();
+  const consentMode = trimmed(
+    webEnv,
+    "NEXT_PUBLIC_GA_CONSENT_MODE",
+  )?.toLowerCase();
+
+  if (vercelEnabled && vercelEnabled !== "true" && vercelEnabled !== "false") {
+    failures.push(
+      'NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED must be "true" or "false".',
+    );
+  }
+
+  if (consentMode && consentMode !== "basic" && consentMode !== "immediate") {
+    failures.push(
+      'NEXT_PUBLIC_GA_CONSENT_MODE must be "basic" or "immediate".',
+    );
+  }
+
+  return failures;
+}
+
+export function validateAttioConfiguration(webEnv) {
+  const accessToken = trimmed(webEnv, "ATTIO_ACCESS_TOKEN");
+  const inboundListId = trimmed(webEnv, "ATTIO_INBOUND_LIST_ID");
+
+  if (!accessToken && !inboundListId) return [];
+
+  const failures = [];
+  if (!accessToken) {
+    failures.push(
+      "ATTIO_ACCESS_TOKEN is required when Attio CRM capture is configured.",
+    );
+  }
+  if (!inboundListId) {
+    failures.push(
+      "ATTIO_INBOUND_LIST_ID is required when Attio CRM capture is configured.",
+    );
+  }
+  return failures;
+}
+
 export function validateLaunch({ root, processEnvironment = process.env }) {
   const { webEnv, studioEnv } = loadEnvironment(root, processEnvironment);
   const failures = [];
@@ -270,9 +316,8 @@ export function validateLaunch({ root, processEnvironment = process.env }) {
   failures.push(...validateSanityConfiguration({ webEnv, studioEnv }));
 
   const contactFormExists =
-    existsSync(
-      join(root, "src/app/(site)/(home)/components/contact-form/index.tsx"),
-    ) || existsSync(join(root, "src/app/api/contact/route.ts"));
+    existsSync(join(root, "src/components/contact-form/index.tsx")) ||
+    existsSync(join(root, "src/app/api/contact/route.ts"));
   if (contactFormExists) {
     requireValue(
       "RESEND_API_KEY",
@@ -307,6 +352,8 @@ export function validateLaunch({ root, processEnvironment = process.env }) {
     );
   }
 
+  failures.push(...validateAnalyticsConfiguration(webEnv));
+  failures.push(...validateAttioConfiguration(webEnv));
   failures.push(...findRuntimePlaceholders(root));
   failures.push(...checkProviderDisclosures(root));
   return failures;
