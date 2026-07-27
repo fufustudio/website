@@ -19,11 +19,11 @@
     "repair-keys:apply": "sanity exec scripts/repair-sanity-array-keys.ts --with-user-token -- --apply"
   },
   "dependencies": {
-    "@sanity/icons": "^3.7.4",
-    "@sanity/vision": "^5.31.1",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "sanity": "^5.31.1",
+    "@sanity/icons": "^5.2.1",
+    "@sanity/vision": "^6.6.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "sanity": "^6.6.0",
     "styled-components": "^6.1.19"
   },
   "devDependencies": {
