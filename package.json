@@ -85,7 +85,7 @@
     "sharp": "^0.35.2",
     "svgo": "^4.0.1",
     "typed-css-modules": "^0.9.1",
-    "typescript": "^5",
+    "typescript": "^7",
     "vitest": "^4.1.9"
   },
   "lint-staged": {
